@@ -32,7 +32,7 @@ LazyData: true
 Depends: 
     R (>= 4.1.0)
 Imports:
-    synthesisr (>= 0.3.6),
+    synthesisr (>= 0.3.0),
     bibliometrix (>= 4.1.0),
     tidyverse (>= 2.0.0),
     tidytext (>= 0.4.1),
