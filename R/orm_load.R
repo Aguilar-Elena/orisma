@@ -96,7 +96,7 @@ orm_load <- function(path, lang = getOption("orisma.lang", "en"),
         }
       ),
       error = function(e) {
-        cli::cli_alert_warning(paste0("Could not read: ", basename(f), " — ", e$message))
+        cli::cli_alert_warning(paste0("Could not read: ", basename(f), " - ", e$message))
         NULL
       }
     )

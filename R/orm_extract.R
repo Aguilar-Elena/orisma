@@ -4,7 +4,7 @@
 #' `orm_extract()` scans the **title**, **abstract**, and **keywords** of each
 #' record against the active risk dictionary and builds a **binary presence
 #' matrix** (record × risk category). It also detects whether each study
-#' contains direct worker exposure data — the key signal for computing the
+#' contains direct worker exposure data - the key signal for computing the
 #' **WRDI** indicator.
 #'
 #' Matching is case-insensitive and uses whole-word boundary detection to

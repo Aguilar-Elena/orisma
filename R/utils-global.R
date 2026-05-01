@@ -41,3 +41,6 @@ utils::globalVariables(c(
 #'   cli_alert_danger cli_alert_info cli_progress_bar cli_progress_update
 #'   cli_progress_done cli_rule
 NULL
+
+#' @importFrom magrittr %>%
+NULL

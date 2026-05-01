@@ -5,12 +5,12 @@
 #' the full set of outputs:
 #'
 #' **Data files**
-#' - `orisma_corpus.csv` — all records after deduplication
-#' - `orisma_matrix.csv` — binary risk category matrix
-#' - `orisma_indicators.csv` — WRDI, RCS, MGP per category
-#' - `dedup_log.csv` — deduplication statistics
-#' - `prisma_log.csv` — PRISMA-compatible flow log
-#' - `analysis.orisma` — reproducibility certificate (JSON)
+#' - `orisma_corpus.csv` - all records after deduplication
+#' - `orisma_matrix.csv` - binary risk category matrix
+#' - `orisma_indicators.csv` - WRDI, RCS, MGP per category
+#' - `dedup_log.csv` - deduplication statistics
+#' - `prisma_log.csv` - PRISMA-compatible flow log
+#' - `analysis.orisma` - reproducibility certificate (JSON)
 #'
 #' **Visualisations** (PNG + SVG)
 #' - Heatmap: risk categories × materials / clusters
@@ -21,8 +21,8 @@
 #' - Gap map (WRDI vs RCS scatter)
 #'
 #' **Reports**
-#' - `orisma_report.html` — interactive executive report (no R needed to open)
-#' - `orisma_indicators.csv` — flat table for Excel / manual use
+#' - `orisma_report.html` - interactive executive report (no R needed to open)
+#' - `orisma_indicators.csv` - flat table for Excel / manual use
 #'
 #' @param result An `orisma_result` object from [orm_analyse()] or [orm_run()].
 #' @param lang Character. `"en"` or `"es"`. Report language.
@@ -256,15 +256,15 @@ orm_report <- function(result,
     ggplot2::geom_vline(xintercept = result$WRDI_global,
                         linetype = "dashed", colour = "grey40") +
     ggplot2::labs(
-      title = if (lang == "es") "Índice de Desconexión Técnico-Laboral (WRDI)"
+      title = if (lang == "es") "Indice de Desconexion Tecnico-Laboral (WRDI)"
               else "Worker-Risk Disconnection Index (WRDI)",
       subtitle = if (lang == "es")
         paste0("WRDI global: ", result$WRDI_global,
-               " · línea punteada = valor global")
+               " * linea punteada = valor global")
       else
         paste0("Global WRDI: ", result$WRDI_global,
-               " · dashed line = global value"),
-      x = "WRDI (0 = fully connected · 1 = fully disconnected)",
+               " * dashed line = global value"),
+      x = "WRDI (0 = fully connected * 1 = fully disconnected)",
       y = NULL
     ) +
     ggplot2::theme_minimal(base_size = 11) +
@@ -296,10 +296,10 @@ orm_report <- function(result,
     ) +
     ggplot2::scale_size_continuous(name = "N studies", range = c(3, 12)) +
     ggplot2::labs(
-      title = if (lang == "es") "Índice de Saturación por Categoría (RCS)"
+      title = if (lang == "es") "Indice de Saturacion por Categoria (RCS)"
               else "Risk Category Saturation Index (RCS)",
-      subtitle = if (lang == "es") "RCS > 1 = sobrerepresentado · < 1 = infrarepresentado"
-                 else "RCS > 1 = over-represented · < 1 = under-represented",
+      subtitle = if (lang == "es") "RCS > 1 = sobrerepresentado * < 1 = infrarepresentado"
+                 else "RCS > 1 = over-represented * < 1 = under-represented",
       x = "RCS",
       y = if (lang == "es") "% de estudios" else "% of studies"
     ) +
@@ -327,11 +327,11 @@ orm_report <- function(result,
     ggplot2::geom_line(linewidth = 0.8) +
     ggplot2::geom_point(size = 1.5) +
     ggplot2::labs(
-      title  = if (lang == "es") "Evolución temporal por categoría de riesgo"
+      title  = if (lang == "es") "Evolucion temporal por categoria de riesgo"
                else "Temporal trend by risk category",
-      x      = if (lang == "es") "Año" else "Year",
-      y      = if (lang == "es") "Número de estudios" else "Number of studies",
-      colour = if (lang == "es") "Categoría" else "Category"
+      x      = if (lang == "es") "Ano" else "Year",
+      y      = if (lang == "es") "Numero de estudios" else "Number of studies",
+      colour = if (lang == "es") "Categoria" else "Category"
     ) +
     ggplot2::theme_minimal(base_size = 11) +
     ggplot2::theme(legend.position = "bottom")
@@ -362,11 +362,11 @@ orm_report <- function(result,
     ggplot2::scale_size_continuous(range = c(3, 12)) +
     ggplot2::annotate("text", x = max(df$RCS, na.rm=TRUE) * 0.95,
                       y = max(df$WRDI, na.rm=TRUE) * 0.97,
-                      label = if (lang == "es") "Alta saturación\nAlta desconexión"
+                      label = if (lang == "es") "Alta saturacion\nAlta desconexion"
                               else "High saturation\nHigh disconnection",
                       size = 3, colour = "grey40", hjust = 1) +
     ggplot2::labs(
-      title  = if (lang == "es") "Mapa de lagunas · ORISMA Gap Map"
+      title  = if (lang == "es") "Mapa de lagunas * ORISMA Gap Map"
                else "ORISMA Gap Map",
       subtitle = if (lang == "es")
         "Cuadrante superior derecho = sobreestudiado pero sin datos de trabajadores"
@@ -432,9 +432,9 @@ orm_report <- function(result,
     ":</strong> ", result$n_records, "</p>",
     "<p><strong>WRDI (global):</strong> ", result$WRDI_global,
     " (", round(result$WRDI_global * 100, 1), "%)</p>",
-    "<h3>", if (lang=="es") "Indicadores por categoría" else "Indicators by category", "</h3>",
+    "<h3>", if (lang=="es") "Indicadores por categoria" else "Indicators by category", "</h3>",
     "<table><thead><tr>",
-    "<th>", if (lang=="es") "Categoría" else "Category", "</th>",
+    "<th>", if (lang=="es") "Categoria" else "Category", "</th>",
     "<th>N</th><th>%</th><th>WRDI</th><th>RCS</th>",
     "</tr></thead><tbody>", rows, "</tbody></table>",
     "<p style='color:grey;font-size:12px;margin-top:2rem'>",

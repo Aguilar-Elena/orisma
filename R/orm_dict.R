@@ -4,9 +4,9 @@
 #' ORISMA ships with a normative risk dictionary anchored in three
 #' internationally recognised taxonomies:
 #'
-#' - **ISO 45001:2018** — international OHS management system standard
-#' - **INSST** — Instituto Nacional de Seguridad y Salud en el Trabajo (Spain)
-#' - **NIOSH** — National Institute for Occupational Safety and Health (USA)
+#' - **ISO 45001:2018** - international OHS management system standard
+#' - **INSST** - Instituto Nacional de Seguridad y Salud en el Trabajo (Spain)
+#' - **NIOSH** - National Institute for Occupational Safety and Health (USA)
 #'
 #' Each dictionary entry maps a **risk category** (standardised name) to a
 #' **vector of search terms** (the vocabulary the scientific literature uses
@@ -46,7 +46,7 @@ NULL
   # ── 1. Airborne particles and nanoparticles (most prevalent in AM literature)
   nanoparticles = list(
     label_en = "Nanoparticles and ultrafine particles",
-    label_es = "Nanopartículas y partículas ultrafinas",
+    label_es = "Nanoparticulas y particulas ultrafinas",
     taxonomy  = "ISO45001/INSST",
     terms = c(
       "nanoparticle", "nanoparticles", "ultrafine particle", "ultrafine particles",
@@ -66,7 +66,7 @@ NULL
   # ── 2. Industrial hygiene and chemical emissions
   hygiene_emissions = list(
     label_en = "Industrial hygiene and chemical emissions",
-    label_es = "Higiene industrial y emisiones químicas",
+    label_es = "Higiene industrial y emisiones quimicas",
     taxonomy  = "ISO45001/INSST/NIOSH",
     terms = c(
       "industrial hygiene", "chemical emission", "fume emission",
@@ -87,7 +87,7 @@ NULL
   # ── 3. Laser and optical radiation
   laser_radiation = list(
     label_en = "Laser and optical radiation",
-    label_es = "Radiación láser y radiación óptica",
+    label_es = "Radiacion laser y radiacion optica",
     taxonomy  = "ISO45001/INSST",
     terms = c(
       "laser radiation", "laser safety", "laser hazard", "optical radiation",
@@ -122,7 +122,7 @@ NULL
   # ── 5. Fire and explosion (dust and gas)
   explosion = list(
     label_en = "Fire and explosion risk (dust and gas)",
-    label_es = "Riesgo de incendio y explosión (polvo y gas)",
+    label_es = "Riesgo de incendio y explosion (polvo y gas)",
     taxonomy  = "ISO45001/INSST",
     terms = c(
       "explosion", "explosive atmosphere", "dust explosion", "metal dust",
@@ -141,7 +141,7 @@ NULL
   # ── 6. Ergonomic and musculoskeletal hazards
   ergonomics = list(
     label_en = "Ergonomics and musculoskeletal hazards",
-    label_es = "Ergonomía y riesgos musculoesqueléticos",
+    label_es = "Ergonomia y riesgos musculoesqueleticos",
     taxonomy  = "ISO45001/INSST/NIOSH",
     terms = c(
       "ergonomic", "ergonomics", "musculoskeletal", "manual handling",
@@ -159,7 +159,7 @@ NULL
   # ── 7. Electrical hazards
   electrical = list(
     label_en = "Electrical contact and electrical hazards",
-    label_es = "Contacto eléctrico y riesgos eléctricos",
+    label_es = "Contacto electrico y riesgos electricos",
     taxonomy  = "ISO45001/INSST",
     terms = c(
       "electrical hazard", "electric shock", "electrical contact",
@@ -176,7 +176,7 @@ NULL
   # ── 8. Fall hazards
   falls = list(
     label_en = "Falls from height and fall hazards",
-    label_es = "Caídas en altura y riesgos de caída",
+    label_es = "Caidas en altura y riesgos de caida",
     taxonomy  = "ISO45001/INSST",
     terms = c(
       "fall from height", "fall hazard", "working at height",
@@ -192,7 +192,7 @@ NULL
   # ── 9. Psychosocial risks
   psychosocial = list(
     label_en = "Psychosocial risks and work stress",
-    label_es = "Riesgos psicosociales y estrés laboral",
+    label_es = "Riesgos psicosociales y estres laboral",
     taxonomy  = "ISO45001/INSST/NIOSH",
     terms = c(
       "psychosocial risk", "work stress", "burnout", "job strain",
@@ -209,7 +209,7 @@ NULL
   # ── 10. Biological hazards
   biological = list(
     label_en = "Biological hazards",
-    label_es = "Riesgos biológicos",
+    label_es = "Riesgos biologicos",
     taxonomy  = "ISO45001/INSST/NIOSH",
     terms = c(
       "biological hazard", "biohazard", "pathogen", "infection risk",
@@ -230,7 +230,7 @@ NULL
 #' @export
 orm_dict_list <- function() {
   cat("Available built-in dictionaries:\n")
-  cat("  'iso45001_insst' — ISO 45001 + INSST + NIOSH (default, recommended)\n")
+  cat("  'iso45001_insst' - ISO 45001 + INSST + NIOSH (default, recommended)\n")
   invisible(c("iso45001_insst"))
 }
 

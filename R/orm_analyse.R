@@ -3,16 +3,16 @@
 #' @description
 #' `orm_analyse()` takes an extraction matrix and computes:
 #'
-#' - **WRDI** — Worker-Risk Disconnection Index: the proportion of studies that
+#' - **WRDI** - Worker-Risk Disconnection Index: the proportion of studies that
 #'   characterise a risk without measuring direct worker exposure. A WRDI of 1
 #'   means all studies are purely technical (no worker data); 0 means all
 #'   studies include direct worker exposure measurement.
 #'
-#' - **RCS** — Risk Category Saturation Index: relative dominance of each
+#' - **RCS** - Risk Category Saturation Index: relative dominance of each
 #'   risk category compared to a uniform-distribution baseline. RCS > 1 means
 #'   the category is over-represented; RCS < 1 means it is under-represented.
 #'
-#' - **MGP** — Material-Gap Profile: ratio of a material's known hazard
+#' - **MGP** - Material-Gap Profile: ratio of a material's known hazard
 #'   potential (from the literature consensus) to its proportional coverage in
 #'   the corpus. Detects hazardous materials that are academically under-studied.
 #'
@@ -67,7 +67,7 @@ orm_analyse <- function(mx,
   n_cats     <- ncol(bin_mat)
   cat_names  <- colnames(bin_mat)
 
-  # ── 1. WRDI — Worker-Risk Disconnection Index ────────────────────────────────
+  # ── 1. WRDI - Worker-Risk Disconnection Index ────────────────────────────────
   # Global WRDI
   n_with_workers    <- sum(refs$has_worker_data, na.rm = TRUE)
   n_without_workers <- n_records - n_with_workers
@@ -91,7 +91,7 @@ orm_analyse <- function(mx,
     )
   }
 
-  # ── 2. RCS — Risk Category Saturation Index ──────────────────────────────────
+  # ── 2. RCS - Risk Category Saturation Index ──────────────────────────────────
   # Observed frequency per category
   cat_counts  <- colSums(bin_mat)
   total_hits  <- sum(cat_counts)
@@ -104,7 +104,7 @@ orm_analyse <- function(mx,
     cli::cli_alert_success(.msg("analyse_rcs", lang, n_cats = n_cats))
   }
 
-  # ── 3. MGP — Material-Gap Profile ────────────────────────────────────────────
+  # ── 3. MGP - Material-Gap Profile ────────────────────────────────────────────
   MGP <- NULL
 
   if (!is.null(material_col) && material_col %in% names(refs)) {
@@ -138,7 +138,7 @@ orm_analyse <- function(mx,
     }
   } else if (!is.null(material_col)) {
     cli::cli_alert_warning(paste0(
-      "Column '", material_col, "' not found — MGP skipped."
+      "Column '", material_col, "' not found - MGP skipped."
     ))
   }
 
@@ -235,7 +235,7 @@ print.orisma_result <- function(x, ...) {
         row.names = FALSE)
 
   if (!is.null(x$MGP)) {
-    cat("\n MGP — Material-Gap Profile (top 5):\n")
+    cat("\n MGP - Material-Gap Profile (top 5):\n")
     print(utils::head(x$MGP, 5), row.names = FALSE)
   }
 
