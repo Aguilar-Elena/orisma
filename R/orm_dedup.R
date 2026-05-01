@@ -53,8 +53,8 @@ orm_dedup <- function(refs,
          call. = FALSE)
   }
 
-  if (verbose) cli::cli_h1("orm_msg("phase_dedup", lang))
-  if (verbose) cli::cli_alert_info("orm_msg("dedup_start", lang))
+  if (verbose) cli::cli_h1(orm_msg("phase_dedup", lang))
+  if (verbose) cli::cli_alert_info(orm_msg("dedup_start", lang))
 
   n_start  <- nrow(refs)
   log_rows <- list()
@@ -63,7 +63,7 @@ orm_dedup <- function(refs,
   n_before <- nrow(refs)
 
   if (!"doi" %in% names(refs) || all(is.na(refs$doi))) {
-    if (verbose) cli::cli_alert_warning("orm_msg("err_no_doi", lang))
+    if (verbose) cli::cli_alert_warning(orm_msg("err_no_doi", lang))
     n_doi_removed <- 0L
   } else {
     refs <- refs %>%
@@ -83,14 +83,14 @@ orm_dedup <- function(refs,
   }
 
   if (verbose) {
-    cli::cli_alert_success("orm_msg("dedup_doi", lang, n_removed = n_doi_removed))
+    cli::cli_alert_success(orm_msg("dedup_doi", lang, n_removed = n_doi_removed))
   }
 
   # ── Step 2: Normalised title match ──────────────────────────────────────────
   n_before <- nrow(refs)
 
   if (!"title" %in% names(refs) || all(is.na(refs$title))) {
-    cli::cli_alert_danger("orm_msg("err_no_title", lang))
+    cli::cli_alert_danger(orm_msg("err_no_title", lang))
     stop("Cannot deduplicate without a title column.", call. = FALSE)
   }
 
@@ -109,7 +109,7 @@ orm_dedup <- function(refs,
   )
 
   if (verbose) {
-    cli::cli_alert_success("orm_msg("dedup_title", lang,
+    cli::cli_alert_success(orm_msg("dedup_title", lang,
                                 n_removed = n_title_removed))
   }
 
@@ -156,7 +156,7 @@ orm_dedup <- function(refs,
   )
 
   if (verbose) {
-    cli::cli_alert_success("orm_msg("dedup_fuzzy", lang,
+    cli::cli_alert_success(orm_msg("dedup_fuzzy", lang,
                                 n_removed = n_fuzzy_removed))
   }
 
@@ -174,7 +174,7 @@ orm_dedup <- function(refs,
 
   if (verbose) {
     cli::cli_alert_success(
-      "orm_msg("dedup_done", lang,
+      orm_msg("dedup_done", lang,
            n_unique        = nrow(refs),
            n_total_removed = n_total_removed)
     )

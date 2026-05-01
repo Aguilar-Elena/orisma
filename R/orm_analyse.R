@@ -57,8 +57,8 @@ orm_analyse <- function(mx,
   }
 
   if (verbose) {
-    cli::cli_h1("orm_msg("phase_analyse", lang))
-    cli::cli_alert_info("orm_msg("analyse_start", lang))
+    cli::cli_h1(orm_msg("phase_analyse", lang))
+    cli::cli_alert_info(orm_msg("analyse_start", lang))
   }
 
   refs       <- mx$refs
@@ -85,7 +85,7 @@ orm_analyse <- function(mx,
 
   if (verbose) {
     cli::cli_alert_success(
-      "orm_msg("analyse_wrdi", lang,
+      orm_msg("analyse_wrdi", lang,
            value = WRDI_global,
            pct   = round(WRDI_global * 100, 1))
     )
@@ -101,7 +101,7 @@ orm_analyse <- function(mx,
   RCS <- round(cat_counts / uniform_exp, 4)
 
   if (verbose) {
-    cli::cli_alert_success("orm_msg("analyse_rcs", lang, n_cats = n_cats))
+    cli::cli_alert_success(orm_msg("analyse_rcs", lang, n_cats = n_cats))
   }
 
   # -- 3. MGP - Material-Gap Profile --------------------------------------------
@@ -134,7 +134,7 @@ orm_analyse <- function(mx,
     MGP <- MGP[order(-MGP$MGP), ]
 
     if (verbose) {
-      cli::cli_alert_success("orm_msg("analyse_mgp", lang, n_mats = n_mats))
+      cli::cli_alert_success(orm_msg("analyse_mgp", lang, n_mats = n_mats))
     }
   } else if (!is.null(material_col)) {
     cli::cli_alert_warning(paste0(
@@ -178,7 +178,7 @@ orm_analyse <- function(mx,
   )
   rownames(indicators) <- NULL
 
-  if (verbose) cli::cli_alert_success("orm_msg("analyse_done", lang))
+  if (verbose) cli::cli_alert_success(orm_msg("analyse_done", lang))
 
   # -- 7. Assemble result --------------------------------------------------------
   result <- list(
