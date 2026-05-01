@@ -1,52 +1,177 @@
-#' Automatic dimension extraction from bibliographic corpus
+#' Automatic dimension extraction and risk cross-matrix
 #'
 #' @description
 #' `orm_autodim()` automatically discovers the most relevant contextual
-#' dimensions of a corpus without requiring any user configuration.
-#' Works for any domain: materials in AM, settings in healthcare,
-#' tasks in construction, agents in biological studies, etc.
+#' dimensions of a corpus using two complementary modes:
+#'
+#' **Mode 1: Dictionary blocks** (default, `method = "blocks"`)
+#' Uses the normative blocks of the ORISMA dictionary (A-Safety, B-Hygiene,
+#' C-Ergonomics, D-Psychosociology, E-Biological, F-Emerging) as dimensions.
+#' Computes a block x block co-occurrence matrix showing how many studies
+#' address combinations of risk blocks simultaneously. Works for any corpus
+#' without any configuration.
+#'
+#' **Mode 2: Free text** (`method = "text"`)
+#' Extracts discriminant terms from abstracts using TF-IDF-like filtering.
+#' Useful for discovering domain-specific dimensions not covered by the
+#' dictionary (e.g. specific materials, sectors, tasks).
 #'
 #' @param mx An `orisma_matrix` object from [orm_extract()].
-#' @param text_col Character. Text field to analyse. Default `"abstract"`.
-#' @param n_dims Integer. Max dimension groups to return. Default `15`.
-#' @param min_freq Integer. Min records a term must appear in. Default `2`.
-#' @param min_cooccur Numeric (0-1). Min proportion co-occurring with a risk. Default `0.5`.
-#' @param max_doc_pct Numeric (0-1). Max proportion of documents a term can
-#'   appear in. Terms above this threshold are too generic to be discriminant.
-#'   Default `0.6`.
-#' @param fuzzy_sim Numeric (0-1). Similarity threshold for grouping terms. Default `0.85`.
-#' @param stopwords Character vector. Additional stopwords. Default `NULL`.
+#' @param method Character. `"blocks"` (default) or `"text"`.
+#' @param text_col Character. Text field for `method = "text"`. Default `"abstract"`.
+#' @param n_dims Integer. Max dimensions for `method = "text"`. Default `12`.
+#' @param min_freq Integer. Min document frequency for `method = "text"`. Default `3`.
+#' @param max_doc_pct Numeric (0-1). Max document proportion for `method = "text"`.
+#'   Terms above this are too generic. Default `0.35`.
+#' @param min_cooccur Numeric (0-1). Min co-occurrence with a risk. Default `0.5`.
+#' @param fuzzy_sim Numeric (0-1). Fuzzy grouping threshold. Default `0.85`.
+#' @param stopwords Character vector. Extra stopwords for `method = "text"`.
 #' @param lang Character. `"en"` or `"es"`.
 #' @param verbose Logical.
 #'
-#' @return A list (class `orisma_dims`) with detected dimension groups.
+#' @return A list (class `orisma_dims`) ready for [orm_dim_matrix()].
 #' @seealso [orm_dim_matrix()]
 #' @export
 orm_autodim <- function(mx,
+                        method      = "blocks",
                         text_col    = "abstract",
-                        n_dims      = 15L,
-                        min_freq    = 2L,
+                        n_dims      = 12L,
+                        min_freq    = 3L,
+                        max_doc_pct = 0.35,
                         min_cooccur = 0.5,
-                        max_doc_pct = 0.6,
                         fuzzy_sim   = 0.85,
                         stopwords   = NULL,
                         lang        = getOption("orisma.lang", "en"),
                         verbose     = getOption("orisma.verbose", TRUE)) {
 
   .check_lang(lang)
-
   if (!inherits(mx, "orisma_matrix")) {
     stop("'mx' must be an orisma_matrix object from orm_extract().", call. = FALSE)
   }
-
-  refs         <- mx$refs
-  bin_mat      <- mx$matrix
-  n_total_docs <- nrow(refs)
+  if (!method %in% c("blocks", "text")) {
+    stop("'method' must be 'blocks' or 'text'.", call. = FALSE)
+  }
 
   if (verbose) cli::cli_h2(
     if (lang == "es") "Extraccion automatica de dimensiones"
     else "Automatic dimension extraction"
   )
+
+  if (method == "blocks") {
+    .autodim_blocks(mx, lang, verbose)
+  } else {
+    .autodim_text(mx, text_col, n_dims, min_freq, max_doc_pct,
+                  min_cooccur, fuzzy_sim, stopwords, lang, verbose)
+  }
+}
+
+
+# =============================================================================
+# MODE 1: DICTIONARY BLOCKS
+# =============================================================================
+
+#' @noRd
+.autodim_blocks <- function(mx, lang, verbose) {
+
+  refs    <- mx$refs
+  bin_mat <- mx$matrix
+  dict    <- mx$dict
+
+  # Extract block for each category
+  cat_blocks <- vapply(names(dict), function(k) {
+    b <- dict[[k]]$block
+    if (is.null(b)) "Unknown" else b
+  }, character(1))
+
+  unique_blocks <- unique(cat_blocks)
+  unique_blocks <- sort(unique_blocks[!is.na(unique_blocks)])
+
+  if (verbose) cli::cli_alert_info(paste0(
+    if (lang == "es") "Modo: bloques normativos · " else "Mode: normative blocks · ",
+    length(unique_blocks), " bloques detectados"
+  ))
+
+  # For each block, which records have at least one category from that block?
+  block_presence <- matrix(0L,
+    nrow = nrow(bin_mat),
+    ncol = length(unique_blocks),
+    dimnames = list(rownames(bin_mat), unique_blocks)
+  )
+
+  for (b in unique_blocks) {
+    cats_in_block <- names(cat_blocks)[cat_blocks == b]
+    cats_present  <- intersect(cats_in_block, colnames(bin_mat))
+    if (length(cats_present) > 0) {
+      block_presence[, b] <- as.integer(rowSums(bin_mat[, cats_present, drop = FALSE]) > 0)
+    }
+  }
+
+  # Build dim_list: each block is a dimension
+  # Terms = category keys belonging to that block
+  dim_list <- lapply(unique_blocks, function(b) {
+    cats_in_block <- names(cat_blocks)[cat_blocks == b]
+    intersect(cats_in_block, colnames(bin_mat))
+  })
+  names(dim_list) <- unique_blocks
+
+  # Remove empty blocks
+  non_empty <- vapply(dim_list, length, integer(1)) > 0
+  dim_list  <- dim_list[non_empty]
+
+  # Frequency: how many records have at least one cat from this block
+  group_freqs <- vapply(names(dim_list), function(b) {
+    sum(block_presence[, b])
+  }, integer(1))
+
+  dim_list <- dim_list[order(-group_freqs)]
+
+  if (verbose) {
+    cli::cli_alert_success(paste0(
+      length(dim_list),
+      if (lang == "es") " bloques como dimensiones"
+      else " blocks as dimensions"
+    ))
+    for (nm in names(dim_list)) {
+      cli::cli_alert_info(paste0(
+        "  [", nm, "]  n=", group_freqs[nm],
+        "  cats=", length(dim_list[[nm]])
+      ))
+    }
+  }
+
+  tf_df <- data.frame(
+    term       = names(dim_list),
+    group_freq = as.integer(group_freqs[names(dim_list)]),
+    n_cats     = vapply(dim_list, length, integer(1)),
+    stringsAsFactors = FALSE
+  )
+
+  result <- list(
+    dims           = dim_list,
+    term_freq      = tf_df,
+    n_dims         = length(dim_list),
+    text_col       = NA_character_,
+    method         = "blocks",
+    block_presence = block_presence,
+    params         = list(method = "blocks")
+  )
+  class(result) <- c("orisma_dims", "list")
+  attr(result, "orisma_lang") <- lang
+  result
+}
+
+
+# =============================================================================
+# MODE 2: FREE TEXT
+# =============================================================================
+
+#' @noRd
+.autodim_text <- function(mx, text_col, n_dims, min_freq, max_doc_pct,
+                           min_cooccur, fuzzy_sim, stopwords, lang, verbose) {
+
+  refs         <- mx$refs
+  bin_mat      <- mx$matrix
+  n_total_docs <- nrow(refs)
 
   # Select text column
   if (!text_col %in% names(refs) ||
@@ -58,21 +183,18 @@ orm_autodim <- function(mx,
     )
   }
 
-  # Records with at least one risk detected
-  has_risk    <- rowSums(bin_mat) > 0
-  refs_risk   <- refs[has_risk, ]
-  text_risk   <- tolower(as.character(refs_risk[[text_col]]))
+  has_risk  <- rowSums(bin_mat) > 0
+  refs_risk <- refs[has_risk, ]
+  text_risk <- tolower(as.character(refs_risk[[text_col]]))
   text_risk[is.na(text_risk)] <- ""
-  n_with_risk <- sum(has_risk)
 
   if (verbose) cli::cli_alert_info(paste0(
-    if (lang == "es") "Analizando " else "Analysing ",
-    n_with_risk,
-    if (lang == "es") " registros con riesgo detectado"
-    else " records with at least one risk detected"
+    if (lang == "es") "Modo: texto libre · analizando "
+    else "Mode: free text · analysing ",
+    sum(has_risk), " records with risk detected"
   ))
 
-  # Built-in stopwords
+  # Stopwords
   sw_base <- c(
     "the","a","an","and","or","but","in","on","at","to","for","of","with",
     "by","from","as","is","was","are","were","be","been","being","have",
@@ -103,14 +225,19 @@ orm_autodim <- function(mx,
     "emission","emissions","sample","samples","control","controls","effect",
     "effects","potential","current","process","processes","surface",
     "material","materials","type","types","size","number","time","work",
-    "working","workplace","environment","environmental","also","these",
-    "their","been","have","were","with","that","this","from","they","were",
-    "been","also","after","than","both","into","very","only","been","when",
-    "which","there","could","other","would","about","these","some","their"
+    "working","workplace","environment","environmental","author","authors",
+    "technique","techniques","application","applications","printed","printer",
+    "printers","release","released","increase","increased","increases",
+    "technology","technologies","industrial","printing","powder","powders",
+    "laser","metals","chemical","chemicals","showed","showed","range",
+    "related","system","systems","conditions","condition","properties",
+    "impact","impacts","human","energy","fusion","melting","metallic",
+    "filament","filaments","challenges","challenge","concentrations",
+    "additive","additives","manufacturing","metal","process","processes"
   )
   sw_all <- unique(c(sw_base, stopwords))
 
-  # Tokenise: per-document unique words (4+ chars, alpha only)
+  # Tokenise
   tokens_list <- lapply(seq_along(text_risk), function(i) {
     txt   <- text_risk[[i]]
     words <- unlist(regmatches(txt, gregexpr("[a-z]{4,}", txt)))
@@ -118,46 +245,29 @@ orm_autodim <- function(mx,
     unique(words)
   })
 
-  # Global term frequency (document frequency, not raw count)
   all_terms <- unlist(tokens_list)
   term_freq <- sort(table(all_terms), decreasing = TRUE)
   term_freq <- term_freq[term_freq >= min_freq]
 
-  if (length(term_freq) == 0) {
-    if (verbose) cli::cli_alert_warning(
-      if (lang == "es") "Sin terminos frecuentes. Reduzca min_freq."
-      else "No frequent terms found. Try reducing min_freq."
-    )
-    return(.empty_dims())
-  }
+  if (length(term_freq) == 0) return(.empty_dims())
 
-  # Full text corpus for doc-frequency calculation
+  # Full corpus for doc-frequency
   all_text_full <- tolower(as.character(refs[[text_col]]))
   all_text_full[is.na(all_text_full)] <- ""
 
-  # Filter: remove terms appearing in too many documents (too generic)
   candidate_terms <- names(term_freq)
+
+  # Filter: max_doc_pct
   term_doc_pct <- vapply(candidate_terms, function(term) {
     n_docs <- sum(grepl(paste0("\\b", term, "\\b"), all_text_full, perl = TRUE))
     n_docs / n_total_docs
   }, numeric(1))
-
   candidate_terms <- candidate_terms[term_doc_pct <= max_doc_pct]
   term_freq       <- term_freq[candidate_terms]
 
-  if (length(candidate_terms) == 0) {
-    if (verbose) cli::cli_alert_warning(
-      if (lang == "es")
-        paste0("Todos los terminos superan max_doc_pct=", max_doc_pct,
-               ". Aumente este valor.")
-      else
-        paste0("All terms exceed max_doc_pct=", max_doc_pct,
-               ". Try increasing this value.")
-    )
-    return(.empty_dims())
-  }
+  if (length(candidate_terms) == 0) return(.empty_dims())
 
-  # Co-occurrence filter: proportion of term appearances that co-occur with a risk
+  # Co-occurrence filter
   cooccur_scores <- vapply(candidate_terms, function(term) {
     in_risk   <- vapply(tokens_list, function(toks) term %in% toks, logical(1))
     n_in_risk <- sum(in_risk)
@@ -168,16 +278,9 @@ orm_autodim <- function(mx,
   }, numeric(1))
 
   valid_terms <- candidate_terms[cooccur_scores >= min_cooccur]
+  if (length(valid_terms) == 0) return(.empty_dims())
 
-  if (length(valid_terms) == 0) {
-    if (verbose) cli::cli_alert_warning(
-      if (lang == "es") "Ningun termino supera el umbral de co-ocurrencia."
-      else "No terms pass the co-occurrence threshold."
-    )
-    return(.empty_dims())
-  }
-
-  # Fuzzy grouping: merge near-identical terms
+  # Fuzzy grouping
   n_terms <- length(valid_terms)
   groups  <- seq_len(n_terms)
 
@@ -185,17 +288,13 @@ orm_autodim <- function(mx,
     dist_mat  <- stringdist::stringdistmatrix(valid_terms, valid_terms, method = "lv")
     max_chars <- outer(nchar(valid_terms), nchar(valid_terms), pmax)
     sim_mat   <- 1 - dist_mat / pmax(max_chars, 1)
-
     for (i in seq_len(n_terms - 1)) {
       for (j in seq(i + 1, n_terms)) {
-        if (sim_mat[i, j] >= fuzzy_sim && groups[j] == j) {
-          groups[j] <- groups[i]
-        }
+        if (sim_mat[i, j] >= fuzzy_sim && groups[j] == j) groups[j] <- groups[i]
       }
     }
   }
 
-  # Build group list
   unique_groups <- unique(groups)
   dim_list <- lapply(unique_groups, function(g) {
     members <- valid_terms[groups == g]
@@ -204,7 +303,6 @@ orm_autodim <- function(mx,
   })
   names(dim_list) <- vapply(dim_list, `[[`, character(1), 1)
 
-  # Sort by total group frequency
   group_freqs <- vapply(dim_list, function(g) {
     sum(as.integer(term_freq[g[g %in% names(term_freq)]]), na.rm = TRUE)
   }, numeric(1))
@@ -212,22 +310,16 @@ orm_autodim <- function(mx,
   if (length(dim_list) > n_dims) dim_list <- dim_list[seq_len(n_dims)]
 
   if (verbose) {
-    cli::cli_alert_success(paste0(
-      length(dim_list),
-      if (lang == "es") " dimensiones detectadas automaticamente"
-      else " dimensions detected automatically"
-    ))
+    cli::cli_alert_success(paste0(length(dim_list), " dimensions detected"))
     for (nm in names(dim_list)) {
       syns <- dim_list[[nm]]
       cli::cli_alert_info(paste0(
         "  [", nm, "]",
-        if (length(syns) > 1) paste0(" + ", paste(syns[-1], collapse = ", "))
-        else ""
+        if (length(syns) > 1) paste0(" + ", paste(syns[-1], collapse = ", ")) else ""
       ))
     }
   }
 
-  # Build term frequency table
   tf_df <- data.frame(
     term        = names(dim_list),
     group_freq  = as.integer(group_freqs[seq_along(dim_list)]),
@@ -245,13 +337,9 @@ orm_autodim <- function(mx,
     term_freq = tf_df,
     n_dims    = length(dim_list),
     text_col  = text_col,
-    params    = list(
-      min_freq    = min_freq,
-      min_cooccur = min_cooccur,
-      max_doc_pct = max_doc_pct,
-      fuzzy_sim   = fuzzy_sim,
-      n_dims      = n_dims
-    )
+    method    = "text",
+    params    = list(min_freq = min_freq, min_cooccur = min_cooccur,
+                     max_doc_pct = max_doc_pct, fuzzy_sim = fuzzy_sim)
   )
   class(result) <- c("orisma_dims", "list")
   attr(result, "orisma_lang") <- lang
@@ -259,26 +347,36 @@ orm_autodim <- function(mx,
 }
 
 
-#' Build a risk x dimension cross-matrix
+# =============================================================================
+# orm_dim_matrix
+# =============================================================================
+
+#' Build a risk category x dimension cross-matrix
 #'
 #' @description
 #' Builds a risk category x dimension cross-matrix and saves a hierarchical
-#' clustered heatmap. The matrix shows how many studies address each
-#' combination of risk category and contextual dimension.
+#' clustered heatmap with dendrograms and numeric values in each cell.
 #'
-#' @param result An `orisma_result` object.
+#' When `dims` was built with `method = "blocks"`, the matrix shows
+#' risk categories x normative blocks (A-Safety, B-Hygiene, etc.).
+#' When `dims` was built with `method = "text"`, the matrix shows
+#' risk categories x discovered text dimensions.
+#'
+#' @param result An `orisma_result` object from [orm_analyse()] or [orm_run()].
 #' @param dims An `orisma_dims` object from [orm_autodim()].
-#' @param min_records Integer. Min records for a risk category to appear. Default `2`.
+#' @param min_records Integer. Min records for a risk category row. Default `2`.
 #' @param out_dir Character or NULL. Directory to save the heatmap PNG.
+#' @param filename Character. Output filename. Default `"risk_dimension_heatmap.png"`.
 #' @param lang Character. `"en"` or `"es"`.
 #' @param verbose Logical.
 #'
-#' @return Invisibly returns the cross-matrix.
+#' @return Invisibly returns the cross-matrix (risk categories x dimensions).
 #' @export
 orm_dim_matrix <- function(result,
                             dims,
                             min_records = 2L,
                             out_dir     = NULL,
+                            filename    = "risk_dimension_heatmap.png",
                             lang        = getOption("orisma.lang", "en"),
                             verbose     = getOption("orisma.verbose", TRUE)) {
 
@@ -289,77 +387,104 @@ orm_dim_matrix <- function(result,
 
   refs     <- result$refs
   bin_mat  <- result$matrix
-  text_col <- dims$text_col
   dim_list <- dims$dims
+  method   <- dims$method
 
-  # Active risk categories
+  # Active risk categories (rows)
   active_cats <- result$indicators %>%
     dplyr::filter(.data$n_records >= min_records) %>%
+    dplyr::arrange(dplyr::desc(.data$n_records)) %>%
     dplyr::pull(.data$category)
 
   active_labels <- result$indicators %>%
     dplyr::filter(.data$category %in% active_cats) %>%
+    dplyr::arrange(dplyr::desc(.data$n_records)) %>%
     dplyr::pull(.data$label)
 
   bin_active <- bin_mat[, active_cats, drop = FALSE]
+  dim_names  <- names(dim_list)
 
-  text_all <- tolower(as.character(refs[[text_col]]))
-  text_all[is.na(text_all)] <- ""
-
-  dim_names <- names(dim_list)
   cross_mat <- matrix(0L,
     nrow = length(active_cats),
     ncol = length(dim_names),
     dimnames = list(
-      stringr::str_wrap(active_labels, 25),
+      stringr::str_wrap(active_labels, 28),
       dim_names
     )
   )
 
-  for (j in seq_along(dim_names)) {
-    dim_terms <- dim_list[[j]]
-    pattern   <- paste0("\\b(", paste(dim_terms, collapse = "|"), ")\\b")
-    has_dim   <- grepl(pattern, text_all, ignore.case = TRUE, perl = TRUE)
-    for (i in seq_along(active_cats)) {
-      has_risk        <- bin_active[, i] == 1L
-      cross_mat[i, j] <- sum(has_risk & has_dim)
+  if (method == "blocks" && !is.null(dims$block_presence)) {
+    # Mode 1: use pre-computed block presence matrix
+    bp <- dims$block_presence
+    for (j in seq_along(dim_names)) {
+      blk     <- dim_names[[j]]
+      has_dim <- if (blk %in% colnames(bp)) bp[, blk] == 1L
+                 else rep(FALSE, nrow(bp))
+      for (i in seq_along(active_cats)) {
+        has_risk        <- bin_active[, i] == 1L
+        cross_mat[i, j] <- sum(has_risk & has_dim)
+      }
+    }
+  } else {
+    # Mode 2: search terms in text
+    text_col  <- dims$text_col
+    text_all  <- tolower(as.character(refs[[text_col]]))
+    text_all[is.na(text_all)] <- ""
+
+    for (j in seq_along(dim_names)) {
+      dim_terms <- dim_list[[j]]
+      pattern   <- paste0("\\b(", paste(dim_terms, collapse = "|"), ")\\b")
+      has_dim   <- grepl(pattern, text_all, ignore.case = TRUE, perl = TRUE)
+      for (i in seq_along(active_cats)) {
+        has_risk        <- bin_active[, i] == 1L
+        cross_mat[i, j] <- sum(has_risk & has_dim)
+      }
     }
   }
 
-  # Plot heatmap
-  title_txt <- if (lang == "es") "Focos de Riesgo PRL por Dimension"
-               else "OHS Risk Focus by Dimension"
-
+  # Remove zero rows/cols
   row_active <- rowSums(cross_mat) > 0
   col_active <- colSums(cross_mat) > 0
   mat_plot   <- cross_mat[row_active, col_active, drop = FALSE]
 
+  if (verbose) {
+    cli::cli_alert_success(paste0(
+      if (lang == "es") "Matriz: " else "Matrix: ",
+      nrow(mat_plot), " x ", ncol(mat_plot)
+    ))
+  }
+
+  # Heatmap
   if (nrow(mat_plot) >= 2 && ncol(mat_plot) >= 2 && !is.null(out_dir)) {
     if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
-    out_path <- file.path(out_dir, "risk_dimension_heatmap.png")
+    out_path <- file.path(out_dir, filename)
+
+    title_txt <- if (lang == "es") "Focos de Riesgo PRL por Bloque Normativo"
+                 else "OHS Risk Focus by Normative Block"
 
     col_palette <- grDevices::colorRampPalette(
       c("white", "#FFF3E0", "#FFB74D", "#F44336")
     )(50)
 
     grDevices::png(out_path,
-      width  = max(2400, ncol(mat_plot) * 300),
-      height = max(2000, nrow(mat_plot) * 200),
+      width  = max(2800, ncol(mat_plot) * 400),
+      height = max(2400, nrow(mat_plot) * 220),
       res    = 300)
+
     pheatmap::pheatmap(
       mat_plot,
-      cluster_rows     = nrow(mat_plot) > 2,
-      cluster_cols     = ncol(mat_plot) > 2,
-      color            = col_palette,
-      main             = title_txt,
-      fontsize         = 10,
-      fontsize_row     = 9,
-      fontsize_col     = 9,
-      border_color     = "white",
-      angle_col        = 45,
-      display_numbers  = TRUE,
-      number_format    = "%d",
-      number_color     = "grey20"
+      cluster_rows    = nrow(mat_plot) > 2,
+      cluster_cols    = ncol(mat_plot) > 2,
+      color           = col_palette,
+      main            = title_txt,
+      fontsize        = 11,
+      fontsize_row    = 9,
+      fontsize_col    = 10,
+      border_color    = "white",
+      angle_col       = 45,
+      display_numbers = TRUE,
+      number_format   = "%d",
+      number_color    = "grey20"
     )
     grDevices::dev.off()
 
@@ -373,31 +498,45 @@ orm_dim_matrix <- function(result,
 }
 
 
+# =============================================================================
+# PRINT METHODS
+# =============================================================================
+
 #' Print method for orisma_dims
 #' @param x An `orisma_dims` object.
 #' @param ... Further arguments (ignored).
 #' @return Invisibly returns `x`.
 #' @export
 print.orisma_dims <- function(x, ...) {
-  cat("\n-- ORISMA Auto-detected Dimensions --\n")
-  cat(" Dimensions found:", x$n_dims, "\n")
-  cat(" Text field used: ", x$text_col, "\n")
-  cat(" Parameters: min_freq=", x$params$min_freq,
-      " min_cooccur=", x$params$min_cooccur,
-      " max_doc_pct=", x$params$max_doc_pct, "\n\n")
-  cat(" Dimension groups (by frequency):\n")
-  for (i in seq_along(x$dims)) {
-    nm  <- names(x$dims)[i]
-    tf  <- x$term_freq[x$term_freq$term == nm, ]
-    cat(sprintf("  %2d. %-22s  freq=%-4d  doc_pct=%s%%  cooccur=%s%%",
-                i, nm,
-                if (nrow(tf) > 0) tf$group_freq[1] else 0,
-                if (nrow(tf) > 0) tf$doc_pct[1] else "?",
-                if (nrow(tf) > 0) tf$cooccur_pct[1] else "?"))
-    syns <- x$dims[[nm]]
-    if (length(syns) > 1) cat("  [+", paste(syns[-1], collapse = ", "), "]")
-    cat("\n")
+  cat("\n-- ORISMA Dimensions --\n")
+  cat(" Method:          ", x$method, "\n")
+  cat(" Dimensions found:", x$n_dims, "\n\n")
+
+  if (x$method == "blocks") {
+    cat(" Normative blocks (dimensions):\n")
+    for (i in seq_along(x$dims)) {
+      nm <- names(x$dims)[i]
+      tf <- x$term_freq[x$term_freq$term == nm, ]
+      cat(sprintf("  %2d. %-40s  n_records=%-4d  n_cats=%d\n",
+                  i, nm,
+                  if (nrow(tf) > 0) tf$group_freq[1] else 0,
+                  if (nrow(tf) > 0) tf$n_cats[1] else 0))
+    }
+  } else {
+    cat(" Text dimensions (by frequency):\n")
+    for (i in seq_along(x$dims)) {
+      nm   <- names(x$dims)[i]
+      tf   <- x$term_freq[x$term_freq$term == nm, ]
+      syns <- x$dims[[nm]]
+      cat(sprintf("  %2d. %-22s  freq=%-4d  doc_pct=%s%%",
+                  i, nm,
+                  if (nrow(tf) > 0) tf$group_freq[1] else 0,
+                  if (nrow(tf) > 0) tf$doc_pct[1] else "?"))
+      if (length(syns) > 1) cat("  [+", paste(syns[-1], collapse = ", "), "]")
+      cat("\n")
+    }
   }
+  cat("\nUse orm_dim_matrix(result, dims) to build the risk x dimension heatmap.\n")
   invisible(x)
 }
 
@@ -405,7 +544,7 @@ print.orisma_dims <- function(x, ...) {
 #' @noRd
 .empty_dims <- function() {
   result <- list(dims = list(), term_freq = data.frame(), n_dims = 0L,
-                 text_col = "abstract",
+                 text_col = NA_character_, method = "text",
                  params = list())
   class(result) <- c("orisma_dims", "list")
   result
