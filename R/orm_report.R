@@ -68,8 +68,24 @@ orm_report <- function(result,
       .plot_rcs_v2(result, plots_dir, lang, min_records)
       .plot_gap_map_v2(result, plots_dir, lang, min_records)
       .plot_temporal_v2(result, plots_dir, lang, top_n)
+      # Co-occurrence heatmap
       .plot_cooccur_v2(result, plots_dir, lang, min_records)
-      .plot_distribution_v2(result, plots_dir, lang, min_records)
+      
+      # Risk x dimension heatmap (automatic if dims available)
+      if (!is.null(result$dims) && result$dims$n_dims > 0) {
+        tryCatch({
+          mat <- orm_dim_matrix(
+            result,
+            result$dims,
+            min_records = min_records,
+            out_dir     = plots_dir,
+            lang        = lang,
+            verbose     = FALSE
+          )
+        }, error = function(e) {
+          cli::cli_alert_warning(paste0("Dimension heatmap failed: ", e$message))
+        })
+      }      .plot_distribution_v2(result, plots_dir, lang, min_records)
       if (verbose) cli::cli_alert_success(paste0("Plots saved to: ", plots_dir))
     }, error = function(e) {
       cli::cli_alert_warning(paste0("Some plots could not be generated: ", e$message))
