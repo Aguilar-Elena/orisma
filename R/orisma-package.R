@@ -37,7 +37,7 @@
 "_PACKAGE"
 
 .onLoad <- function(libname, pkgname) {
-  source(system.file("i18n/messages.R", package = "orisma"), local = TRUE)
+  # messages now in R/utils-msg.R
   op        <- options()
   op_orisma <- list(
     orisma.lang    = "en",
