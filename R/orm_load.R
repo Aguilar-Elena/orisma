@@ -117,6 +117,7 @@ orm_load <- function(path, lang = getOption("orisma.lang", "en"),
     return(invisible(NULL))
   }
 
+  records_list <- lapply(records_list, function(x) dplyr::mutate(x, dplyr::across(everything(), as.character)))
   combined <- dplyr::bind_rows(records_list)
 
   # Assign internal IDs
