@@ -4,72 +4,49 @@
 #' `orm_run()` is the **single-function entry point** for users who want a
 #' complete ORISMA analysis without managing individual pipeline steps.
 #'
-#' Internally it calls [orm_dedup()], [orm_extract()], and [orm_analyse()] in
-#' sequence with sensible defaults. Advanced users can call each function
-#' separately for full control.
+#' Internally it calls [orm_dedup()], [orm_extract()], [orm_analyse()], and
+#' [orm_autodim()] in sequence with sensible defaults. The result contains
+#' everything needed for [orm_report()].
 #'
 #' ## Minimal usage (3 lines)
 #'
 #' ```r
 #' library(orisma)
-#' data   <- orm_load("my_references/")
-#' result <- orm_run(data)
-#' orm_report(result)
+#' refs   <- orm_load("my_references/")
+#' result <- orm_run(refs)
+#' orm_report(result, lang = "es")
 #' ```
 #'
 #' @param refs An `orisma_refs` object from [orm_load()].
 #' @param dict An `orisma_dict` object. Default: built-in ISO 45001 / INSST /
 #'   NIOSH dictionary via [orm_dict()].
-#' @param material_col Character or `NULL`. Column name containing material
-#'   information for MGP computation. Default `NULL` (MGP skipped).
-#' @param year_col Character. Column name for publication year. Default `"year"`.
-#' @param fuzzy_threshold Numeric. Similarity threshold for fuzzy deduplication.
-#'   Default `0.90`.
-#' @param fields Character vector. Text fields to search for risk terms. Default
+#' @param autodim_method Character. Dimension detection method: `"blocks"`
+#'   (default, uses normative blocks A-F) or `"text"` (free text extraction).
+#' @param material_col Character or `NULL`. Column for MGP computation.
+#' @param year_col Character. Column for temporal analysis. Default `"year"`.
+#' @param fuzzy_threshold Numeric. Deduplication fuzzy threshold. Default `0.90`.
+#' @param fields Character vector. Text fields for risk extraction. Default
 #'   `c("title", "abstract", "keywords")`.
-#' @param lang Character. `"en"` or `"es"`. Overrides `orisma.lang` option.
-#' @param verbose Logical. Print pipeline progress? Default `TRUE`.
-#' @param save_report Logical. Automatically call [orm_report()] at the end?
-#'   Default `FALSE` (call separately for full control over output options).
+#' @param lang Character. `"en"` or `"es"`.
+#' @param verbose Logical. Default `TRUE`.
+#' @param save_report Logical. Auto-call [orm_report()]? Default `FALSE`.
 #' @param out_dir Character. Output directory if `save_report = TRUE`.
 #'
-#' @return An `orisma_result` object. See [orm_analyse()] for full structure.
-#'
-#' @seealso [orm_load()], [orm_dedup()], [orm_extract()], [orm_analyse()],
-#'   [orm_report()]
-#'
-#' @examples
-#' \dontrun{
-#' # Simplest possible workflow
-#' library(orisma)
-#' refs   <- orm_load("my_references/")
-#' result <- orm_run(refs)
-#' orm_report(result)
-#'
-#' # Spanish output
-#' options(orisma.lang = "es")
-#' refs   <- orm_load("mis_referencias/")
-#' result <- orm_run(refs)
-#' orm_report(result, out_dir = "resultados_orisma/")
-#'
-#' # With material column and automatic report
-#' result <- orm_run(refs,
-#'                   material_col  = "material",
-#'                   save_report   = TRUE,
-#'                   out_dir       = "my_outputs/")
-#' }
+#' @return An `orisma_result` object with all indicators, analyses, and
+#'   auto-detected dimensions in `result$dims`.
 #'
 #' @export
 orm_run <- function(refs,
-                    dict              = orm_dict(),
-                    material_col      = NULL,
-                    year_col          = "year",
-                    fuzzy_threshold   = 0.90,
-                    fields            = c("title", "abstract", "keywords"),
-                    lang              = getOption("orisma.lang", "en"),
-                    verbose           = getOption("orisma.verbose", TRUE),
-                    save_report       = FALSE,
-                    out_dir           = getOption("orisma.out_dir", "orisma_output")) {
+                    dict             = orm_dict(),
+                    autodim_method   = "blocks",
+                    material_col     = NULL,
+                    year_col         = "year",
+                    fuzzy_threshold  = 0.90,
+                    fields           = c("title", "abstract", "keywords"),
+                    lang             = getOption("orisma.lang", "en"),
+                    verbose          = getOption("orisma.verbose", TRUE),
+                    save_report      = FALSE,
+                    out_dir          = getOption("orisma.out_dir", "orisma_output")) {
 
   .check_lang(lang)
 
@@ -100,10 +77,26 @@ orm_run <- function(refs,
                         lang         = lang,
                         verbose      = verbose)
 
+  # ── Step 4: Auto-dimension detection ────────────────────────────────────────
+  if (verbose) cli::cli_h2(
+    if (lang == "es") "Deteccion automatica de dimensiones"
+    else "Automatic dimension detection"
+  )
+
+  dims <- tryCatch(
+    orm_autodim(mx, method = autodim_method, lang = lang, verbose = verbose),
+    error = function(e) {
+      cli::cli_alert_warning(paste0("orm_autodim failed: ", e$message))
+      NULL
+    }
+  )
+
+  result$dims <- dims
+  result$mx   <- mx   # store mx for downstream use
+
   # ── Timing ──────────────────────────────────────────────────────────────────
   elapsed <- round((proc.time() - t_start)["elapsed"], 1)
 
-  # Attach pipeline summary as attribute
   attr(result, "pipeline_summary") <- list(
     n_loaded    = nrow(refs),
     n_deduped   = attr(deduped, "dedup_n_unique"),
@@ -124,13 +117,13 @@ orm_run <- function(refs,
       " Records loaded:  ", nrow(refs), "\n",
       "Records deduped: ", attr(deduped, "dedup_n_unique"),
       paste0("(", attr(deduped, "dedup_n_total"), " removed)\n"),
-      "WRDI (global):   ", result$WRDI_global, "\n\n",
+      "WRDI (global):   ", result$WRDI_global, "\n",
+      "Dimensions:      ", if (!is.null(dims)) dims$n_dims else 0, "\n\n",
       sep = ""
     )
     cat("Run orm_report(result) to generate all outputs.\n\n")
   }
 
-  # ── Optional auto-report ────────────────────────────────────────────────────
   if (save_report) {
     orm_report(result, lang = lang, out_dir = out_dir, verbose = verbose)
   }

@@ -549,3 +549,45 @@ print.orisma_dims <- function(x, ...) {
   class(result) <- c("orisma_dims", "list")
   result
 }
+
+# NOTE: The orm_dim_matrix function above is replaced by this improved version
+# which strips block prefixes from column labels and uses log scale for color
+
+#' @noRd
+.plot_dim_heatmap <- function(mat_plot, out_path, lang) {
+  title_txt <- if (lang == "es") "Focos de Riesgo PRL por Bloque Normativo"
+               else "OHS Risk Focus by Normative Block"
+
+  # Clean column names: remove "X - " prefix
+  colnames(mat_plot) <- gsub("^[A-Z] - ", "", colnames(mat_plot))
+
+  # Log scale for color (avoids one dominant row flattening the rest)
+  mat_log <- log1p(mat_plot)
+
+  col_palette <- grDevices::colorRampPalette(
+    c("white", "#FFF3E0", "#FFB74D", "#F44336")
+  )(50)
+
+  grDevices::png(out_path,
+    width  = max(2800, ncol(mat_plot) * 450),
+    height = max(2400, nrow(mat_plot) * 230),
+    res    = 300)
+
+  pheatmap::pheatmap(
+    mat_log,
+    cluster_rows    = nrow(mat_log) > 2,
+    cluster_cols    = ncol(mat_log) > 2,
+    color           = col_palette,
+    main            = title_txt,
+    fontsize        = 11,
+    fontsize_row    = 9,
+    fontsize_col    = 10,
+    border_color    = NA,
+    angle_col       = 45,
+    display_numbers = mat_plot,   # show original counts, color by log
+    number_format   = "%d",
+    number_color    = "grey20",
+    legend          = FALSE
+  )
+  grDevices::dev.off()
+}
