@@ -1,7 +1,7 @@
 Package: orisma
 Title: Occupational Risk Integrated Systematic Mapping and Analysis
 Version: 0.1.0
-Authors@R: 
+Authors@R: c(
     person(
       given = "Ra\u00fal",
       family = "Aguilar-Elena",
@@ -11,7 +11,18 @@ Authors@R:
         ORCID = "",
         institution = "Occupational Risk Prevention and Occupational Health Research Group (GPRL), Universidad Internacional de Valencia (VIU)"
       )
+    ),
+    person(
+      given = "Ana",
+      family = "Delgado-Garcia",
+      role = "aut",
+      email = "a.delgado@usal.es",
+      comment = c(
+        ORCID = "",
+        institution = "Universidad de Salamanca (USAL)"
+      )
     )
+  )
 Description: A systematic bibliometric pipeline for mapping occupational risk
     evidence in any domain - emerging technologies, established hazards, or
     specific industrial sectors. ORISMA automates the full workflow from
