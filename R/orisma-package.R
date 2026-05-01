@@ -90,7 +90,7 @@ NULL
     "\norisma v", utils::packageVersion("orisma"),
     " \u2014 Occupational Risk Integrated Systematic Mapping and Analysis\n",
     "Author: Dr. Ra\u00fal Aguilar-Elena \u00b7 GPRL \u00b7 VIU\n",
-    "Docs:   https://github.com/raguilarelena/orisma\n",
+    "Docs:   https://github.com/Aguilar-Elena/orisma\n",
     "Set language: options(orisma.lang = 'es')  # or 'en'\n"
   )
 }
