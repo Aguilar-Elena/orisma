@@ -62,19 +62,19 @@ orm_load <- function(path, lang = getOption("orisma.lang", "en"),
 
   .check_lang(lang)
 
-  if (verbose) cli::cli_h1(.msg("phase_load", lang))
+  if (verbose) cli::cli_h1("orm_msg("phase_load", lang))
 
   # ── 1. Resolve file list ────────────────────────────────────────────────────
   files <- .resolve_files(path, verbose, lang)
   if (length(files) == 0) {
-    cli::cli_alert_danger(.msg("load_no_files", lang, path = path))
-    cli::cli_alert_info(.msg("load_fmt_hint", lang))
+    cli::cli_alert_danger("orm_msg("load_no_files", lang, path = path))
+    cli::cli_alert_info("orm_msg("load_fmt_hint", lang))
     return(invisible(NULL))
   }
 
   formats <- unique(tools::file_ext(files))
   if (verbose) {
-    cli::cli_alert_info(.msg("load_files", lang,
+    cli::cli_alert_info("orm_msg("load_files", lang,
                              n = length(files),
                              formats = paste(formats, collapse = ", ")))
   }
@@ -133,7 +133,7 @@ orm_load <- function(path, lang = getOption("orisma.lang", "en"),
   attr(combined, "n_sources")      <- length(files)
 
   if (verbose) {
-    cli::cli_alert_success(.msg("load_done", lang,
+    cli::cli_alert_success("orm_msg("load_done", lang,
                                n_total   = nrow(combined),
                                n_sources = length(files)))
   }
@@ -238,6 +238,6 @@ orm_load <- function(path, lang = getOption("orisma.lang", "en"),
 #' @noRd
 .check_lang <- function(lang) {
   if (!lang %in% c("en", "es")) {
-    stop(.msg("err_lang", lang = "en", lang = lang), call. = FALSE)
+    stop("orm_msg("err_lang", lang = "en", lang = lang), call. = FALSE)
   }
 }

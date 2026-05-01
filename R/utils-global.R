@@ -133,7 +133,7 @@ NULL
 
 #' Internal message retrieval function
 #' @noRd
-.msg <- function(key, lang = getOption("orisma.lang", "en"), ...) {
+orm_msg <- function(key, lang = getOption("orisma.lang", "en"), ...) {
   msgs <- .orisma_messages[[lang]]
   if (is.null(msgs)) {
     lang <- "en"

@@ -64,8 +64,8 @@ orm_report <- function(result,
   if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 
   if (verbose) {
-    cli::cli_h1(.msg("phase_report", lang))
-    cli::cli_alert_info(.msg("report_start", lang, out_dir = out_dir))
+    cli::cli_h1("orm_msg("phase_report", lang))
+    cli::cli_alert_info("orm_msg("report_start", lang, out_dir = out_dir))
   }
 
   # ── 1. CSV data files ────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ orm_report <- function(result,
 
     if (verbose) {
       cli::cli_alert_success(
-        .msg("report_cert", lang, file = basename(cert_path))
+        "orm_msg("report_cert", lang, file = basename(cert_path))
       )
     }
   }
@@ -152,7 +152,7 @@ orm_report <- function(result,
       .render_html_report(result, html_path, lang, out_dir)
       if (verbose) {
         cli::cli_alert_success(
-          .msg("report_html", lang, file = basename(html_path))
+          "orm_msg("report_html", lang, file = basename(html_path))
         )
       }
     }, error = function(e) {
@@ -165,7 +165,7 @@ orm_report <- function(result,
 
   if (verbose) {
     cli::cli_rule()
-    cli::cli_alert_success(.msg("report_done", lang, out_dir = out_dir))
+    cli::cli_alert_success("orm_msg("report_done", lang, out_dir = out_dir))
   }
 
   invisible(out_dir)

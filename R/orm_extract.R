@@ -56,9 +56,9 @@ orm_extract <- function(refs,
   .check_lang(lang)
 
   if (verbose) {
-    cli::cli_h1(.msg("phase_extract", lang))
+    cli::cli_h1("orm_msg("phase_extract", lang))
     cli::cli_alert_info(
-      .msg("extract_start", lang,
+      "orm_msg("extract_start", lang,
            dict_name    = attr(dict, "dict_name"),
            dict_version = attr(dict, "dict_version"))
     )
@@ -141,12 +141,12 @@ orm_extract <- function(refs,
   # -- 4. Warn about empty matches ----------------------------------------------
   n_empty <- sum(refs$n_categories == 0)
   if (n_empty > 0 && verbose) {
-    cli::cli_alert_warning(.msg("extract_empty", lang, n = n_empty))
+    cli::cli_alert_warning("orm_msg("extract_empty", lang, n = n_empty))
   }
 
   if (verbose) {
     cli::cli_alert_success(
-      .msg("extract_done", lang,
+      "orm_msg("extract_done", lang,
            n_records = n_records,
            n_cats    = n_cats)
     )
