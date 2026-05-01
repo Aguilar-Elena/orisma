@@ -3,7 +3,7 @@
 #' @description
 #' `orm_extract()` scans the **title**, **abstract**, and **keywords** of each
 #' record against the active risk dictionary and builds a **binary presence
-#' matrix** (record × risk category). It also detects whether each study
+#' matrix** (record x risk category). It also detects whether each study
 #' contains direct worker exposure data - the key signal for computing the
 #' **WRDI** indicator.
 #'
@@ -23,7 +23,7 @@
 #'     \item{`refs`}{Original `orisma_refs` tibble with added columns:
 #'       one binary column per risk category (`cat_*`), `n_categories` (total
 #'       categories matched), and `has_worker_data` (logical).}
-#'     \item{`matrix`}{Pure binary matrix (records × categories) for
+#'     \item{`matrix`}{Pure binary matrix (records x categories) for
 #'       downstream analysis.}
 #'     \item{`dict`}{The dictionary used.}
 #'     \item{`categories`}{Category metadata tibble.}
@@ -64,7 +64,7 @@ orm_extract <- function(refs,
     )
   }
 
-  # ── 1. Build searchable text corpus ─────────────────────────────────────────
+  # -- 1. Build searchable text corpus -----------------------------------------
   available_fields <- intersect(fields, names(refs))
   if (length(available_fields) == 0) {
     stop("None of the specified fields found in the data.", call. = FALSE)
@@ -78,7 +78,7 @@ orm_extract <- function(refs,
       )
     )
 
-  # ── 2. Match each category ───────────────────────────────────────────────────
+  # -- 2. Match each category ---------------------------------------------------
   cat_names   <- names(dict)
   n_cats      <- length(cat_names)
   n_records   <- nrow(refs)
@@ -127,7 +127,7 @@ orm_extract <- function(refs,
 
   if (verbose) cli::cli_progress_done()
 
-  # ── 3. Attach results back to refs tibble ────────────────────────────────────
+  # -- 3. Attach results back to refs tibble ------------------------------------
   cat_df <- as.data.frame(binary_mat)
   names(cat_df) <- paste0("cat_", names(cat_df))
 
@@ -138,7 +138,7 @@ orm_extract <- function(refs,
     ) %>%
     dplyr::select(-".text_corpus")
 
-  # ── 4. Warn about empty matches ──────────────────────────────────────────────
+  # -- 4. Warn about empty matches ----------------------------------------------
   n_empty <- sum(refs$n_categories == 0)
   if (n_empty > 0 && verbose) {
     cli::cli_alert_warning(.msg("extract_empty", lang, n = n_empty))
@@ -152,7 +152,7 @@ orm_extract <- function(refs,
     )
   }
 
-  # ── 5. Assemble output object ─────────────────────────────────────────────────
+  # -- 5. Assemble output object -------------------------------------------------
   result <- list(
     refs       = refs,
     matrix     = binary_mat,
@@ -175,7 +175,7 @@ orm_extract <- function(refs,
 #' Print method for orisma_matrix
 #' @export
 print.orisma_matrix <- function(x, ...) {
-  cat("\n── ORISMA extraction matrix ──────────────────────────────\n")
+  cat("\n-- ORISMA extraction matrix ------------------------------\n")
   cat(" Records:    ", x$n_records, "\n")
   cat(" Categories: ", ncol(x$matrix), "\n")
   cat(" Fields used:", paste(x$fields_used, collapse = ", "), "\n")

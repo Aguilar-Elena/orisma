@@ -67,7 +67,7 @@ orm_analyse <- function(mx,
   n_cats     <- ncol(bin_mat)
   cat_names  <- colnames(bin_mat)
 
-  # ── 1. WRDI - Worker-Risk Disconnection Index ────────────────────────────────
+  # -- 1. WRDI - Worker-Risk Disconnection Index --------------------------------
   # Global WRDI
   n_with_workers    <- sum(refs$has_worker_data, na.rm = TRUE)
   n_without_workers <- n_records - n_with_workers
@@ -91,7 +91,7 @@ orm_analyse <- function(mx,
     )
   }
 
-  # ── 2. RCS - Risk Category Saturation Index ──────────────────────────────────
+  # -- 2. RCS - Risk Category Saturation Index ----------------------------------
   # Observed frequency per category
   cat_counts  <- colSums(bin_mat)
   total_hits  <- sum(cat_counts)
@@ -104,7 +104,7 @@ orm_analyse <- function(mx,
     cli::cli_alert_success(.msg("analyse_rcs", lang, n_cats = n_cats))
   }
 
-  # ── 3. MGP - Material-Gap Profile ────────────────────────────────────────────
+  # -- 3. MGP - Material-Gap Profile --------------------------------------------
   MGP <- NULL
 
   if (!is.null(material_col) && material_col %in% names(refs)) {
@@ -142,12 +142,12 @@ orm_analyse <- function(mx,
     ))
   }
 
-  # ── 4. Co-occurrence matrix ───────────────────────────────────────────────────
+  # -- 4. Co-occurrence matrix ---------------------------------------------------
   # How many studies address both category A and category B simultaneously
   cooccur_mat <- t(bin_mat) %*% bin_mat
   diag(cooccur_mat) <- 0L   # remove self-co-occurrences
 
-  # ── 5. Temporal trend ────────────────────────────────────────────────────────
+  # -- 5. Temporal trend --------------------------------------------------------
   temporal <- NULL
 
   if (year_col %in% names(refs)) {
@@ -166,7 +166,7 @@ orm_analyse <- function(mx,
       )
   }
 
-  # ── 6. Consolidated indicators table ────────────────────────────────────────
+  # -- 6. Consolidated indicators table ----------------------------------------
   indicators <- data.frame(
     category    = cat_names,
     label       = mx$categories$label,
@@ -180,7 +180,7 @@ orm_analyse <- function(mx,
 
   if (verbose) cli::cli_alert_success(.msg("analyse_done", lang))
 
-  # ── 7. Assemble result ────────────────────────────────────────────────────────
+  # -- 7. Assemble result --------------------------------------------------------
   result <- list(
     # Core indicators
     WRDI_global = WRDI_global,
@@ -221,7 +221,7 @@ orm_analyse <- function(mx,
 #' Print method for orisma_result
 #' @export
 print.orisma_result <- function(x, ...) {
-  cat("\n── ORISMA Analysis Result ────────────────────────────────\n")
+  cat("\n-- ORISMA Analysis Result --------------------------------\n")
   cat(" Records analysed:", x$n_records, "\n")
   cat(" Risk categories: ", x$n_categories, "\n\n")
 
