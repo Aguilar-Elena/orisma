@@ -1412,3 +1412,4 @@ print.orisma_dict <- function(x, ...) {
   cat("\nUse orm_dict_categories() for full detail.\n")
   invisible(x)
 }
+# orisma dict v2.0.0
