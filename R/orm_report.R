@@ -840,3 +840,46 @@ orm_report <- function(result,
   writeLines(html, path, useBytes = FALSE)
   invisible(path)
 }
+
+# =============================================================================
+# INTERNAL HELPERS
+# =============================================================================
+
+#' @noRd
+.build_prisma_log <- function(result, lang) {
+  ps <- attr(result, "pipeline_summary")
+  data.frame(
+    phase = c(
+      "Records identified (all databases)",
+      "Duplicates removed",
+      "Records after deduplication",
+      "Records screened",
+      "Records included in analysis"
+    ),
+    n = c(
+      if (!is.null(ps)) ps$n_loaded  else result$n_records,
+      if (!is.null(ps)) ps$n_removed else 0L,
+      if (!is.null(ps)) ps$n_deduped else result$n_records,
+      if (!is.null(ps)) ps$n_deduped else result$n_records,
+      result$n_records
+    ),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @noRd
+.build_certificate <- function(result) {
+  list(
+    orisma_version  = as.character(utils::packageVersion("orisma")),
+    analysis_date   = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+    dict_name       = attr(result, "dict_name"),
+    dict_version    = attr(result, "dict_version"),
+    n_records       = result$n_records,
+    n_categories    = result$n_categories,
+    WRDI_global     = result$WRDI_global,
+    r_version       = paste(R.Version()$major, R.Version()$minor, sep = "."),
+    platform        = R.Version()$platform,
+    digest_matrix   = digest::digest(result$matrix, algo = "md5"),
+    digest_refs     = digest::digest(result$refs,   algo = "md5")
+  )
+}
