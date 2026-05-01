@@ -85,7 +85,8 @@ orm_report <- function(result,
         }, error = function(e) {
           cli::cli_alert_warning(paste0("Dimension heatmap failed: ", e$message))
         })
-      }      .plot_distribution_v2(result, plots_dir, lang, min_records)
+      }
+      .plot_distribution_v2(result, plots_dir, lang, min_records)
       if (verbose) cli::cli_alert_success(paste0("Plots saved to: ", plots_dir))
     }, error = function(e) {
       cli::cli_alert_warning(paste0("Some plots could not be generated: ", e$message))
