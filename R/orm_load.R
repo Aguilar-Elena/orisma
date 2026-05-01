@@ -238,6 +238,6 @@ orm_load <- function(path, lang = getOption("orisma.lang", "en"),
 #' @noRd
 .check_lang <- function(lang) {
   if (!lang %in% c("en", "es")) {
-    stop(orm_msg("err_lang", lang = "en", lang = lang), call. = FALSE)
+    stop(orm_msg("err_lang", "en", lang = lang), call. = FALSE)
   }
 }
