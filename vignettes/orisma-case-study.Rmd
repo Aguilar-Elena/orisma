@@ -1,0 +1,515 @@
+---
+title: "ORISMA: Mapping Occupational Risk Evidence in Metal Additive Manufacturing"
+author: 
+  - "PhD. Raúl Aguilar-Elena (GPRL, Universidad Internacional de Valencia)"
+  - "Ana Delgado-García (Universidad de Salamanca)"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{ORISMA: Mapping Occupational Risk Evidence in Metal Additive Manufacturing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.width = 8,
+  fig.height = 5,
+  out.width = "100%",
+  warning   = FALSE,
+  message   = FALSE,
+  eval      = FALSE
+)
+```
+
+# Introduction
+
+Metal additive manufacturing (AM) -- commonly known as 3D metal printing --
+represents one of the most rapidly expanding advanced manufacturing technologies
+of the 21st century. Its occupational health implications are still poorly
+understood, partly because the scientific literature is growing faster than the
+capacity of occupational health professionals to synthesise and apply it.
+
+`orisma` (**O**ccupational **R**isk **I**ntegrated **S**ystematic **M**apping and
+**A**nalysis) addresses this gap by automating the complete pipeline from
+raw bibliographic exports to actionable risk intelligence -- in a single
+function call.
+
+This vignette demonstrates the full ORISMA workflow using a systematic corpus
+of 184 records (114 unique after deduplication) retrieved from Web of Science
+and Scopus on the topic of occupational health and safety in metal additive
+manufacturing (2015-2026).
+
+## What ORISMA does
+
+ORISMA automates seven analytical steps:
+
+1. **Ingestion** -- reads RIS/BibTeX/CSV files from multiple databases
+2. **Deduplication** -- three-step pipeline (DOI + title + fuzzy matching)
+3. **Risk extraction** -- dictionary-based classification into 58 normative categories
+4. **Bibliometric analysis** -- computes WRDI, RCS, and MGP indicators
+5. **Dimension detection** -- automatic discovery of normative blocks (A-F)
+6. **Preventive intelligence** -- Abstract Sufficiency Score (ASS) and bridge article detection
+7. **Report generation** -- bilingual HTML reports, risk sheets, extraction matrices
+
+## Installation
+
+```{r install, eval = FALSE}
+# From CRAN
+install.packages("orisma")
+
+# Development version
+remotes::install_github("Aguilar-Elena/orisma")
+```
+
+---
+
+# The three-line workflow
+
+The entire analysis pipeline runs in three lines of R:
+
+```{r three_lines}
+library(orisma)
+
+refs   <- orm_load("path/to/ris/files/")
+result <- orm_run(refs, topic = "Metal additive manufacturing - OHS")
+orm_report(result, lang = "en", out_dir = "my_outputs/")
+```
+
+The remainder of this vignette unpacks what happens inside each step and
+interprets the results from the metal AM corpus.
+
+---
+
+# Step 1: Loading and deduplication
+
+## Loading references
+
+`orm_load()` reads all RIS, BibTeX, and CSV files from a folder, detects the
+source database automatically, and returns a standardised `orisma_refs` object.
+
+```{r load}
+library(orisma)
+
+refs <- orm_load(
+  path = "path/to/ris/files/",
+  lang = "en"
+)
+```
+
+In the metal AM corpus, two files were loaded:
+
+- `Wos.ris` -- 73 records from Web of Science
+- `scopusris.ris` -- 111 records from Scopus
+- **Total: 184 records identified**
+
+## Deduplication
+
+`orm_dedup()` runs a three-step deduplication pipeline:
+
+1. **Exact DOI match** -- records with identical DOIs are deduplicated
+2. **Normalised title match** -- titles are lowercased, stripped of punctuation, and matched exactly
+3. **Fuzzy match** -- remaining potential duplicates are identified using Levenshtein distance with a configurable threshold (default: 0.90 similarity)
+
+```{r dedup}
+# Deduplication runs automatically inside orm_run()
+# but can be called independently:
+deduped <- orm_dedup(refs, fuzzy_threshold = 0.90, verbose = TRUE)
+```
+
+**Result for the metal AM corpus:**
+
+| Step | Duplicates removed | Records remaining |
+|------|-------------------|-------------------|
+| Exact DOI | 70 | 114 |
+| Normalised title | 0 | 114 |
+| Fuzzy match | 0 | 114 |
+
+**70 duplicates (38.0%)** were removed, yielding **114 unique records**.
+The high overlap between WoS and Scopus confirms the importance of
+multi-database deduplication in systematic reviews of this topic.
+
+---
+
+# Step 2: Risk category extraction
+
+## The ORISMA dictionary
+
+Risk categories are extracted using a built-in normative dictionary of
+**58 categories** organised in six blocks anchored in ISO 45001:2018,
+INSST, NIOSH, and EU-OSHA:
+
+```{r dict}
+dict <- orm_dict()
+orm_dict_categories(dict)
+```
+
+| Block | Categories | Normative anchors |
+|-------|-----------|-------------------|
+| A -- Safety at work | 18 | INSST / ISO 45001 |
+| B -- Industrial hygiene | 8 | INSST / NIOSH |
+| C -- Ergonomics | 8 | INSST / ISO 45001 |
+| D -- Psychosociology | 11 | INSST / ISO 45001 |
+| E -- Biological hazards | 5 | EU-OSHA / NIOSH |
+| F -- Emerging technologies | 8 | EU-OSHA 2024-2026 |
+
+The dictionary can be extended for any domain:
+
+```{r dict_extend}
+# Add terms to an existing category
+dict <- orm_dict_add_terms(dict, "nanomaterials",
+                           c("nano-aerosol", "NOAA particle"))
+
+# Add a completely new category
+dict <- orm_dict_add_category(dict,
+  key      = "laser_safety",
+  label_en = "Laser safety in AM processes",
+  label_es = "Seguridad laser en procesos AM",
+  terms    = c("laser safety", "laser hazard", "laser exposure")
+)
+```
+
+## Extraction results
+
+```{r extract}
+mx <- orm_extract(deduped, dict = dict,
+                  fields  = c("title", "abstract", "keywords"),
+                  verbose = TRUE)
+print(mx)
+```
+
+**22 of 58 categories** were detected in the metal AM corpus. The top five
+by frequency:
+
+| Category | N records | % |
+|----------|-----------|---|
+| Additive manufacturing and 3D printing | 113 | 99.1% |
+| Exposure to hazardous chemical agents | 61 | 53.5% |
+| Nanomaterials and nanotechnology | 28 | 24.6% |
+| Exposure to carcinogens, mutagens, reprotoxics (CMR) | 15 | 13.2% |
+| Exposure to ionising radiation | 10 | 8.8% |
+
+Note that "Additive manufacturing and 3D printing" (Block F) dominates the
+corpus -- this is the **technological context** of the corpus, not a risk
+category per se. ORISMA's `orm_priority()` function automatically separates
+context categories from risk categories.
+
+---
+
+# Step 3: The three original ORISMA indicators
+
+## Worker-Risk Disconnection Index (WRDI)
+
+The WRDI measures the proportion of studies characterising an occupational risk
+**without** including direct worker exposure data. It is computed at both the
+category level and globally.
+
+$$WRDI_c = 1 - \frac{N_{workers,c}}{N_{total,c}}$$
+
+where $N_{workers,c}$ is the number of studies in category $c$ that include
+worker exposure terms (e.g. "worker exposure", "breathing zone", "personal
+sampling", "field study") and $N_{total,c}$ is the total number of studies.
+
+```{r wrdi}
+result <- orm_run(refs, topic = "Metal additive manufacturing - OHS")
+cat("Global WRDI:", result$WRDI_global, "\n")
+```
+
+**Global WRDI = 0.6053** for the metal AM corpus. This means that
+**60.5% of studies** characterise occupational risks without including
+direct worker exposure data. The literature is predominantly technical
+-- characterising emissions, particles, and processes in controlled
+settings -- without measuring what workers actually breathe or absorb.
+
+WRDI by category reveals important heterogeneity:
+
+| Category | WRDI | Interpretation |
+|----------|------|---------------|
+| Indoor air quality | 0.22 | Best connected to workers |
+| Exposure to ionising radiation | 0.30 | Good worker data |
+| Exposure to hazardous chemical agents | 0.34 | Moderate |
+| Nanomaterials and nanotechnology | 0.39 | Moderate |
+| Biological hazard - Bacteria | 1.00 | No worker data at all |
+| Artificial intelligence and autonomous systems | 1.00 | No worker data |
+
+## Risk Category Saturation Index (RCS)
+
+The RCS measures the relative dominance of each risk category compared
+to a hypothetical uniform distribution:
+
+$$RCS_c = \frac{N_c \cdot K}{N_{total}}$$
+
+where $K$ = 58 categories. RCS > 1 indicates over-representation;
+RCS < 1 indicates under-representation.
+
+```{r rcs}
+ind <- result$indicators[result$indicators$n_records > 0, ]
+ind[order(-ind$RCS), c("label", "n_records", "RCS")]
+```
+
+The metal AM corpus shows extreme saturation:
+
+- **Additive manufacturing and 3D printing: RCS = 24.1** -- massively
+  over-represented (the dominant topic of the corpus)
+- **Exposure to hazardous chemical agents: RCS = 13.0** -- strongly
+  over-represented
+- **Most other categories: RCS < 1** -- under-represented or absent
+
+This pattern confirms that the literature has concentrated on chemical
+emissions while largely ignoring safety, ergonomic, psychosocial, and
+biological risks.
+
+## Material-Gap Profile (MGP)
+
+The MGP identifies materials that are hazardous but understudied:
+
+$$MGP_m = \frac{hazard\_proxy_m}{coverage_m}$$
+
+```{r mgp}
+print(result$MGP)
+```
+
+| Material | Coverage | Hazard proxy | MGP |
+|----------|----------|--------------|-----|
+| Titanium | 2.9% | 1.33 | **45.3** |
+| Aluminium | 8.8% | 1.11 | 12.6 |
+| Nickel/Inconel | 8.8% | 0.89 | 10.1 |
+| Steel | 17.6% | 1.33 | 7.6 |
+| Others/Mixed | 61.8% | 0.89 | 1.4 |
+
+**Titanium has the highest MGP (45.3)**. Despite its known carcinogenic
+and respiratory hazard potential, it appears in only 2.9% of corpus
+studies. This represents the most critical material gap in the field.
+
+---
+
+# Step 4: Automatic dimension detection
+
+`orm_autodim()` automatically discovers the normative blocks present in
+the corpus without any user configuration. In "blocks" mode (default), it
+uses the six normative blocks (A-F) as dimensions:
+
+```{r autodim}
+dims <- orm_autodim(result$mx, method = "blocks", verbose = TRUE)
+print(dims)
+```
+
+For the metal AM corpus, all six blocks are present, with Block F
+(Emerging technologies) dominating (n=113) followed by Block B
+(Industrial hygiene, n=66).
+
+`orm_dim_matrix()` then builds a risk category x normative block
+cross-matrix, visualised as a hierarchical clustered heatmap:
+
+```{r dim_matrix}
+mat <- orm_dim_matrix(result, dims,
+                      out_dir = "outputs/plots/",
+                      lang    = "en")
+```
+
+The heatmap reveals that most studies addressing chemical agents (Block B)
+also address the AM technology context (Block F), while safety risks
+(Block A) are largely absent from the literature.
+
+---
+
+# Step 5: Preventive intelligence indicators
+
+## Abstract Sufficiency Score (ASS)
+
+The ASS is a cumulative 0-5 index of preventive informativeness:
+
+```{r ass}
+mx  <- orm_ass(result$mx, verbose = TRUE)
+orm_ass_plot(mx, lang = "en")
+```
+
+**Distribution for the metal AM corpus (N=114):**
+
+| Level | N | % | Meaning |
+|-------|---|---|---------|
+| 0 | 28 | 24.6% | Non-informative for OHS |
+| 1 | 12 | 10.5% | Mentions hazard, no workplace context |
+| 2 | 27 | 23.7% | Occupational context present |
+| 3 | 24 | 21.1% | Exposure measurement reported |
+| 4 | 20 | 17.5% | Worker exposure with result |
+| 5 | 3 | 2.6% | Complete: exposure + population + method + prevention |
+
+**Mean ASS = 2.04/5**. Only 3 abstracts (2.6%) contain complete
+preventive information. Nearly one quarter (24.6%) contain no
+OHS-useful information at all. This quantifies the practical gap
+that practitioners face when consulting the primary literature.
+
+## Bridge article detection
+
+```{r bridge}
+mx <- orm_bridge(result$mx, verbose = TRUE)
+```
+
+**Bridge classification:**
+
+| Type | N | % |
+|------|---|---|
+| Strong bridge (score 4-5) | 22 | 19.3% |
+| Partial bridge (score 3) | 4 | 3.5% |
+| Technical study | 88 | 77.2% |
+
+**77.2% of studies are purely technical** -- they do not simultaneously
+address workers, exposure measurement, AND preventive recommendations.
+Only 22 studies (19.3%) qualify as strong bridges between technical
+science and applied OHS prevention.
+
+## Priority reading ranking
+
+```{r ranking}
+ranking <- orm_ranking(result$mx, top_n = 10, lang = "en")
+print(ranking)
+```
+
+The top-ranked article (*Additive Manufacturing for Occupational Hygiene*,
+Stefaniak et al. 2021) achieves a perfect bridge score of 5/5 and ASS
+of 5/5, with a combined priority score of 21. This is the single most
+valuable article for a practitioner entering this field.
+
+---
+
+# Step 6: Practitioner outputs
+
+## Risk sheet
+
+The `orm_risk_sheet()` function generates a structured, actionable risk
+sheet for OHS practitioners. It is regulation-neutral (applicable
+globally) and includes the traffic-light priority classification:
+
+```{r risk_sheet}
+orm_risk_sheet(result,
+  topic           = "Metal additive manufacturing",
+  search_strategy = "Systematic search in WoS and Scopus (2015-2026).",
+  out_dir         = "outputs/",
+  lang            = "en"
+)
+```
+
+The risk sheet:
+
+- Separates **context categories** (RCS > 15, dominant topic) from
+  actual **risk categories**
+- Classifies each risk as **RED** (critical gap), **AMBER** (attention),
+  **GREEN** (reasonable coverage), or **GREY** (insufficient evidence)
+- Includes a full **methodological section** with WRDI definition,
+  extraction method, deduplication statistics, and limitations
+
+## Guided extraction matrix
+
+For systematic reviewers, `orm_extraction_matrix()` generates a
+pre-filled CSV template ready for full-text review:
+
+```{r extraction}
+orm_extraction_matrix(result$mx, result,
+  top_n   = 20,
+  out_dir = "outputs/",
+  lang    = "en"
+)
+```
+
+The matrix pre-fills bibliographic data, ORISMA scores, auto-detected
+technology, and risk categories. Reviewers only need to complete the
+PDF-dependent fields (study design, population, exposure level, main
+result, preventive recommendations).
+
+---
+
+# Step 7: Validation
+
+ORISMA's automatic classification should be validated against manual
+review before publication. `orm_validate()` supports this:
+
+```{r validate}
+# Step 1: Generate validation sample
+val_path <- orm_validate(result$mx,
+  n_sample = 30,
+  out_dir  = "outputs/validation/",
+  lang     = "en"
+)
+
+# Step 2: Open the CSV, fill in manual_* columns (0 or 1)
+# Step 3: Compute Cohen's Kappa
+kappa_results <- orm_validate(result$mx,
+  validation_file = val_path,
+  out_dir         = "outputs/validation/",
+  lang            = "en"
+)
+print(kappa_results)
+```
+
+A Kappa >= 0.7 is considered acceptable for publication in high-impact
+OHS journals.
+
+---
+
+# Summary of results
+
+The ORISMA analysis of 114 unique studies on occupational health in
+metal additive manufacturing reveals:
+
+1. **High technical-preventive disconnection** (WRDI = 0.61): 60.5% of
+   studies lack direct worker exposure data. The evidence base is
+   predominantly technical.
+
+2. **Extreme category saturation**: Chemical agents (RCS = 13.0) and
+   the AM technology context (RCS = 24.1) dominate the literature.
+   Safety, ergonomic, and psychosocial risks are virtually absent.
+
+3. **Critical material gap**: Titanium (MGP = 45.3) is the most
+   hazardous and least-studied material. A priority target for future
+   research.
+
+4. **Low abstract informativeness** (mean ASS = 2.04/5): Most abstracts
+   describe technical processes without conveying worker exposure data.
+   Only 2.6% of abstracts are fully informative for OHS practitioners.
+
+5. **Few bridge articles** (22/114, 19.3%): Only one in five studies
+   connects technical characterisation with real worker data and
+   preventive recommendations.
+
+These findings demonstrate both the utility of ORISMA for rapid
+evidence mapping and the significant methodological gap in the
+occupational health literature on metal AM.
+
+---
+
+# Session information
+
+```{r session}
+sessionInfo()
+```
+
+---
+
+# References
+
+Aguilar-Elena, R. & Delgado-Garcia, A. (2025). *Mapping the Safety
+Landscape of Emerging Technologies: A Bibliometric Analysis of
+Occupational Risks in Metal Additive Manufacturing*. [Under review]
+
+International Organization for Standardization. (2018). *ISO 45001:2018
+Occupational health and safety management systems -- Requirements with
+guidance for use*. ISO.
+
+National Institute for Safety and Health at Work (INSST). (2023).
+*Clasificacion de los accidentes de trabajo por forma/contacto*.
+Ministerio de Trabajo y Economia Social, Spain.
+
+National Institute for Occupational Safety and Health (NIOSH). (2023).
+*NIOSH Pocket Guide to Chemical Hazards*. CDC/NIOSH.
+
+European Agency for Safety and Health at Work (EU-OSHA). (2023).
+*Foresight on new and emerging occupational safety and health risks*.
+EU-OSHA.
