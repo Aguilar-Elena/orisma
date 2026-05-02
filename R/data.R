@@ -32,5 +32,7 @@
 #' head(orisma_sample)
 #' table(orisma_sample$bridge_type)
 #' table(orisma_sample$ass_score)
+#' @docType data
+#' @keywords datasets
 "orisma_sample"
 
