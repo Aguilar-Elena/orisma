@@ -1,0 +1,36 @@
+
+#' Sample bibliographic records for ORISMA examples and testing
+#'
+#' A dataset of 20 bibliographic records representative of the
+#' occupational health and safety literature on metal additive
+#' manufacturing (2015-2026). Records were retrieved from Web of
+#' Science and Scopus and pre-processed with ORISMA.
+#'
+#' The dataset includes records at different levels of preventive
+#' informativeness (ASS 0-5) and bridge classification, making it
+#' suitable for demonstrating the full ORISMA pipeline without
+#' requiring access to bibliographic databases.
+#'
+#' @format A data frame with 20 rows and 9 variables:
+#' \describe{
+#'   \item{record_id}{Character. Unique record identifier.}
+#'   \item{title}{Character. Article title.}
+#'   \item{abstract}{Character. Abstract (truncated to 800 characters).}
+#'   \item{year}{Integer. Publication year.}
+#'   \item{doi}{Character. Digital Object Identifier.}
+#'   \item{source_db}{Character. Source database (Web of Science or Scopus).}
+#'   \item{bridge_type}{Character. Bridge classification (Strong bridge,
+#'     Partial bridge, or Technical).}
+#'   \item{bridge_score}{Integer. Bridge score (0-5).}
+#'   \item{ass_score}{Integer. Abstract Sufficiency Score (0-5).}
+#' }
+#' @source Web of Science and Scopus systematic search on occupational
+#'   health and safety in metal additive manufacturing (2015-2026).
+#'   Retrieved and processed with \code{\link{orm_run}}.
+#' @examples
+#' data(orisma_sample)
+#' head(orisma_sample)
+#' table(orisma_sample$bridge_type)
+#' table(orisma_sample$ass_score)
+"orisma_sample"
+
