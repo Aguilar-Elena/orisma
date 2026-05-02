@@ -225,7 +225,7 @@
 #'
 #' Aguilar-Elena, R. & Delgado-Garcia, A. (2025). *Mapping the Safety
 #' Landscape of Emerging Technologies: A Bibliometric Analysis of
-#' Occupational Risks in Metal Additive Manufacturing*. [Under review]
+#' Occupational Risks in Metal Additive Manufacturing*. (Under review)
 #'
 #' The ORISMA methodological framework is described in:
 #'
