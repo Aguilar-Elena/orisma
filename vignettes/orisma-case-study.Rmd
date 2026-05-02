@@ -13,7 +13,6 @@ vignette: >
   %\VignetteIndexEntry{ORISMA: Mapping Occupational Risk Evidence in Metal Additive Manufacturing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: references.bib
 ---
 
 ```{r setup, include = FALSE}
