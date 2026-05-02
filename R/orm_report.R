@@ -804,6 +804,15 @@ orm_report <- function(result,
   else "",
   '</div>
 
+  <!-- Risk x Dimension heatmap -->
+  <div class="section">
+    <h2>', if(is_es) "Focos de riesgo por bloque normativo" else "OHS Risk Focus by Normative Block", '</h2>',
+  if (plots_exist && file.exists(file.path(out_dir, "plots", "risk_dimension_heatmap.png"))) paste0('
+    <div class="plot-full"><img src="plots/risk_dimension_heatmap.png"
+      alt="', if(is_es) "Focos de riesgo" else "Risk focus by block", '"></div>')
+  else "",
+  '</div>
+
   <!-- Gap table -->
   <div class="section">
     <h2>', if(is_es) "Lagunas criticas detectadas (WRDI >= 0.7)"
