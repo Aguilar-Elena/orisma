@@ -149,3 +149,8 @@ orm_msg <- function(key, lang = getOption("orisma.lang", "en"), ...) {
   }
   result
 }
+
+#' @importFrom stats setNames
+#' @importFrom dplyr everything
+NULL
+

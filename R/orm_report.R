@@ -339,9 +339,9 @@ orm_report <- function(result,
   title_txt    <- if (lang == "es") "Evolucion temporal por categoria de riesgo"
                   else "Risk category evolution over time"
   subtitle_txt <- if (lang == "es")
-    paste0("Top ", top_n, if (!is.null(topic) && nchar(topic) > 0) paste0(" · ", topic) else "")
+    paste0("Top ", top_n, if (!is.null(topic) && nchar(topic) > 0) paste0(" . ", topic) else "")
   else
-    paste0("Top ", top_n, if (!is.null(topic) && nchar(topic) > 0) paste0(" · ", topic) else "")
+    paste0("Top ", top_n, if (!is.null(topic) && nchar(topic) > 0) paste0(" . ", topic) else "")
 
   p <- ggplot2::ggplot(temporal_long,
                        ggplot2::aes(x     = .data$year,
@@ -824,9 +824,9 @@ orm_report <- function(result,
            else "Abstract Sufficiency Score (ASS)", '</h2>
     <div class="alert-box">',
       if(is_es)
-        "El ASS mide cuanta informacion preventivamente util contiene cada abstract (0 = no informativo · 5 = exposicion + poblacion + metodo + prevencion)."
+        "El ASS mide cuanta informacion preventivamente util contiene cada abstract (0 = no informativo . 5 = exposicion + poblacion + metodo + prevencion)."
       else
-        "The ASS measures how much preventively useful information each abstract contains (0 = non-informative · 5 = exposure + population + method + prevention).",
+        "The ASS measures how much preventively useful information each abstract contains (0 = non-informative . 5 = exposure + population + method + prevention).",
     '</div>',
   if (plots_exist && file.exists(file.path(out_dir, "plots", "ass_distribution.png"))) paste0('
     <div class="plot-full"><img src="plots/ass_distribution.png"

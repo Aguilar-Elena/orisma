@@ -222,7 +222,7 @@ orm_validate <- function(mx,
 #' @return Invisibly returns `x`.
 #' @export
 print.orisma_kappa <- function(x, ...) {
-  cat("\n-- ORISMA Validation · Cohen Kappa --\n")
+  cat("\n-- ORISMA Validation . Cohen Kappa --\n")
   cat(" Global Kappa:     ", attr(x, "global_kappa"), "\n")
   cat(" Records annotated:", attr(x, "n_annotated"), "\n\n")
   cat(" Kappa by category:\n")

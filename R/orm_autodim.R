@@ -87,7 +87,7 @@ orm_autodim <- function(mx,
   unique_blocks <- sort(unique_blocks[!is.na(unique_blocks)])
 
   if (verbose) cli::cli_alert_info(paste0(
-    if (lang == "es") "Modo: bloques normativos · " else "Mode: normative blocks · ",
+    if (lang == "es") "Modo: bloques normativos . " else "Mode: normative blocks . ",
     length(unique_blocks), " bloques detectados"
   ))
 
@@ -189,8 +189,8 @@ orm_autodim <- function(mx,
   text_risk[is.na(text_risk)] <- ""
 
   if (verbose) cli::cli_alert_info(paste0(
-    if (lang == "es") "Modo: texto libre · analizando "
-    else "Mode: free text · analysing ",
+    if (lang == "es") "Modo: texto libre . analizando "
+    else "Mode: free text . analysing ",
     sum(has_risk), " records with risk detected"
   ))
 

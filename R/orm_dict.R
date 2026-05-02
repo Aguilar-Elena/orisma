@@ -31,7 +31,7 @@
 #' orm_dict_categories(dict)
 #'
 #' # Add custom terms to a category
-#' dict <- orm_dict_add_terms(dict, "nanomaterials_am",
+#' dict <- orm_dict_add_terms(dict, "nanomaterials",
 #'                            c("metal powder", "powder bed"))
 #'
 #' @name orisma_dict

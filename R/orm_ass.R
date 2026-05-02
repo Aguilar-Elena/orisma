@@ -241,9 +241,9 @@ orm_ass_plot <- function(mx,
       title    = if(is_es) "Distribucion del Abstract Sufficiency Score (ASS)"
                  else "Abstract Sufficiency Score (ASS) distribution",
       subtitle = if(is_es)
-        paste0("N = ", sum(df$n), " registros · 0 = no informativo · 5 = completo para PRL")
+        paste0("N = ", sum(df$n), " registros . 0 = no informativo . 5 = completo para PRL")
       else
-        paste0("N = ", sum(df$n), " records · 0 = non-informative · 5 = complete for OHS"),
+        paste0("N = ", sum(df$n), " records . 0 = non-informative . 5 = complete for OHS"),
       x = "ASS",
       y = if(is_es) "Numero de registros" else "Number of records"
     ) +

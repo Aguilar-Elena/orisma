@@ -35,6 +35,9 @@
 #' @param lang Character. `"en"` or `"es"`.
 #' @param verbose Logical. Default `TRUE`.
 #' @param save_report Logical. Auto-call [orm_report()]? Default `FALSE`.
+#' @param topic Character. Domain or technology being analysed (e.g.
+#'   'Noise in construction', 'Metal AM'). Used in plot subtitles and
+#'   report headers. If NULL, neutral generic text is used.
 #' @param out_dir Character. Output directory if `save_report = TRUE`.
 #'
 #' @return An `orisma_result` object containing all indicators, analyses,
