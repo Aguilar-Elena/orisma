@@ -14,11 +14,14 @@
 #'   plots. Default `1`.
 #' @param top_n Integer. Number of top categories to show in temporal plot.
 #'   Default `8`.
+#' @param topic Character. Domain or technology being analysed. Used in plot
+#'   subtitles and report headers. If NULL, neutral generic text is used.
 #' @param verbose Logical. Print progress?
 #'
 #' @return Invisibly returns the output directory path.
 #' @export
 orm_report <- function(result,
+                       topic       = NULL,
                        lang        = getOption("orisma.lang", "en"),
                        out_dir     = getOption("orisma.out_dir", "orisma_output"),
                        formats     = c("html", "csv", "plots", "certificate"),
@@ -31,6 +34,9 @@ orm_report <- function(result,
     stop("'result' must be an orisma_result object from orm_analyse() or orm_run().",
          call. = FALSE)
   }
+
+  # Use topic from result if not explicitly provided
+  if (is.null(topic) && !is.null(result$topic)) topic <- result$topic
 
   if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 
@@ -67,25 +73,8 @@ orm_report <- function(result,
       .plot_wrdi_v2(result, plots_dir, lang, min_records)
       .plot_rcs_v2(result, plots_dir, lang, min_records)
       .plot_gap_map_v2(result, plots_dir, lang, min_records)
-      .plot_temporal_v2(result, plots_dir, lang, top_n)
-      # Co-occurrence heatmap
+      .plot_temporal_v2(result, plots_dir, lang, top_n, topic)
       .plot_cooccur_v2(result, plots_dir, lang, min_records)
-      
-      # Risk x dimension heatmap (automatic if dims available)
-      if (!is.null(result$dims) && result$dims$n_dims > 0) {
-        tryCatch({
-          mat <- orm_dim_matrix(
-            result,
-            result$dims,
-            min_records = min_records,
-            out_dir     = plots_dir,
-            lang        = lang,
-            verbose     = FALSE
-          )
-        }, error = function(e) {
-          cli::cli_alert_warning(paste0("Dimension heatmap failed: ", e$message))
-        })
-      }
       .plot_distribution_v2(result, plots_dir, lang, min_records)
       if (verbose) cli::cli_alert_success(paste0("Plots saved to: ", plots_dir))
     }, error = function(e) {
@@ -107,7 +96,7 @@ orm_report <- function(result,
   if ("html" %in% formats) {
     html_path <- file.path(out_dir, "orisma_report.html")
     tryCatch({
-      .write_html_report_v2(result, html_path, lang, out_dir, min_records)
+      .write_html_report_v2(result, html_path, lang, out_dir, min_records, topic)
       if (verbose) {
         cli::cli_alert_success(orm_msg("report_html", lang, file = basename(html_path)))
       }
@@ -296,7 +285,7 @@ orm_report <- function(result,
 
 
 #' @noRd
-.plot_temporal_v2 <- function(result, dir, lang, top_n = 8) {
+.plot_temporal_v2 <- function(result, dir, lang, top_n = 8, topic = NULL) {
   if (is.null(result$temporal)) return(invisible(NULL))
 
   # Top N categories by total records
@@ -327,9 +316,9 @@ orm_report <- function(result,
   title_txt    <- if (lang == "es") "Evolucion temporal por categoria de riesgo"
                   else "Risk category evolution over time"
   subtitle_txt <- if (lang == "es")
-    paste0("Top ", top_n, " categorias * literatura de AM metalica")
+    paste0("Top ", top_n, if (!is.null(topic) && nchar(topic) > 0) paste0(" · ", topic) else "")
   else
-    paste0("Top ", top_n, " categories * Metal AM literature")
+    paste0("Top ", top_n, if (!is.null(topic) && nchar(topic) > 0) paste0(" · ", topic) else "")
 
   p <- ggplot2::ggplot(temporal_long,
                        ggplot2::aes(x     = .data$year,
@@ -481,7 +470,7 @@ orm_report <- function(result,
 # =============================================================================
 
 #' @noRd
-.write_html_report_v2 <- function(result, path, lang, out_dir, min_records = 1) {
+.write_html_report_v2 <- function(result, path, lang, out_dir, min_records = 1, topic = NULL) {
 
   is_es   <- lang == "es"
   n_rec   <- result$n_records
@@ -682,11 +671,13 @@ orm_report <- function(result,
 
 <div class="header">
   <h1>ORISMA</h1>
-  <p>', if(is_es) "Informe de mapeo sistematico de evidencia sobre riesgos laborales"
-         else "Occupational Risk Integrated Systematic Mapping and Analysis Report", '</p>
+  <p>',
+    if(!is.null(topic) && nchar(topic) > 0) paste0('<strong>', topic, '</strong> &nbsp;&mdash;&nbsp;') else "",
+    if(is_es) "Informe de mapeo sistematico de evidencia sobre riesgos laborales"
+    else "Occupational Risk Integrated Systematic Mapping and Analysis Report", '</p>
   <div class="meta">
     ', if(is_es) "Generado el" else "Generated on", ': ', date_str, ' &nbsp;|&nbsp;
-    ', if(is_es) "Diccionario" else "Dictionary", ': iso45001_insst v2.0.0 (56 categorias) &nbsp;|&nbsp;
+    ', if(is_es) "Diccionario" else "Dictionary", ': iso45001_insst v2.0.0 (', length(result$dict), ' ', if(is_es) "categorias" else "categories", ') &nbsp;|&nbsp;
     orisma v0.1.0
   </div>
 </div>
@@ -804,15 +795,6 @@ orm_report <- function(result,
   else "",
   '</div>
 
-  <!-- Risk x Dimension heatmap -->
-  <div class="section">
-    <h2>', if(is_es) "Focos de riesgo por bloque normativo" else "OHS Risk Focus by Normative Block", '</h2>',
-  if (plots_exist && file.exists(file.path(out_dir, "plots", "risk_dimension_heatmap.png"))) paste0('
-    <div class="plot-full"><img src="plots/risk_dimension_heatmap.png"
-      alt="', if(is_es) "Focos de riesgo" else "Risk focus by block", '"></div>')
-  else "",
-  '</div>
-
   <!-- Gap table -->
   <div class="section">
     <h2>', if(is_es) "Lagunas criticas detectadas (WRDI >= 0.7)"
@@ -865,47 +847,4 @@ orm_report <- function(result,
 
   writeLines(html, path, useBytes = FALSE)
   invisible(path)
-}
-
-# =============================================================================
-# INTERNAL HELPERS
-# =============================================================================
-
-#' @noRd
-.build_prisma_log <- function(result, lang) {
-  ps <- attr(result, "pipeline_summary")
-  data.frame(
-    phase = c(
-      "Records identified (all databases)",
-      "Duplicates removed",
-      "Records after deduplication",
-      "Records screened",
-      "Records included in analysis"
-    ),
-    n = c(
-      if (!is.null(ps)) ps$n_loaded  else result$n_records,
-      if (!is.null(ps)) ps$n_removed else 0L,
-      if (!is.null(ps)) ps$n_deduped else result$n_records,
-      if (!is.null(ps)) ps$n_deduped else result$n_records,
-      result$n_records
-    ),
-    stringsAsFactors = FALSE
-  )
-}
-
-#' @noRd
-.build_certificate <- function(result) {
-  list(
-    orisma_version  = as.character(utils::packageVersion("orisma")),
-    analysis_date   = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
-    dict_name       = attr(result, "dict_name"),
-    dict_version    = attr(result, "dict_version"),
-    n_records       = result$n_records,
-    n_categories    = result$n_categories,
-    WRDI_global     = result$WRDI_global,
-    r_version       = paste(R.Version()$major, R.Version()$minor, sep = "."),
-    platform        = R.Version()$platform,
-    digest_matrix   = digest::digest(result$matrix, algo = "md5"),
-    digest_refs     = digest::digest(result$refs,   algo = "md5")
-  )
 }

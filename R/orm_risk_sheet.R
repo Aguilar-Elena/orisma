@@ -91,9 +91,9 @@ orm_risk_sheet <- function(result,
   # Search strategy placeholder
   search_txt <- if (!is.null(search_strategy)) search_strategy
   else if (is_es)
-    paste0("Busqueda sistematica en WoS y/o Scopus. Consulta el fichero prisma_log.csv para el detalle del flujo de seleccion.")
+    "Busqueda sistematica en bases de datos bibliograficas. Consulte el fichero prisma_log.csv para el detalle completo del flujo de seleccion de estudios."
   else
-    paste0("Systematic search in WoS and/or Scopus. See prisma_log.csv for full selection flow.")
+    "Systematic search in bibliographic databases. See prisma_log.csv for the full study selection flow."
 
   # Inclusion criteria placeholder
   incl_txt <- if (!is.null(inclusion_criteria)) inclusion_criteria

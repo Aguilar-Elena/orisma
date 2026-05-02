@@ -45,6 +45,7 @@
 #' @export
 orm_run <- function(refs,
                     dict            = orm_dict(),
+                    topic           = NULL,
                     autodim_method  = "blocks",
                     material_col    = NULL,
                     year_col        = "year",
@@ -124,6 +125,7 @@ orm_run <- function(refs,
 
   # ── Assemble result ──────────────────────────────────────────────────────────
   result$dims    <- dims
+  result$topic   <- topic
   result$mx      <- mx
   result$ranking <- ranking
 
@@ -171,7 +173,7 @@ orm_run <- function(refs,
   }
 
   if (save_report) {
-    orm_report(result, lang = lang, out_dir = out_dir, verbose = verbose)
+    orm_report(result, lang = lang, out_dir = out_dir, topic = topic, verbose = verbose)
   }
 
   result
