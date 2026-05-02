@@ -75,6 +75,29 @@ orm_report <- function(result,
       .plot_gap_map_v2(result, plots_dir, lang, min_records)
       .plot_temporal_v2(result, plots_dir, lang, top_n, topic)
       .plot_cooccur_v2(result, plots_dir, lang, min_records)
+
+      # ASS distribution plot
+      if (!is.null(result$mx) && "ass_score" %in% names(result$mx$refs)) {
+        tryCatch({
+          orm_ass_plot(result$mx, out_dir = plots_dir, lang = lang)
+        }, error = function(e) {
+          cli::cli_alert_warning(paste0("ASS plot: ", e$message))
+        })
+      }
+
+      # Risk x dimension heatmap
+      if (!is.null(result$dims) && result$dims$n_dims > 0) {
+        tryCatch({
+          orm_dim_matrix(result, result$dims,
+                         min_records = min_records,
+                         out_dir     = plots_dir,
+                         lang        = lang,
+                         verbose     = FALSE)
+        }, error = function(e) {
+          cli::cli_alert_warning(paste0("Dim heatmap: ", e$message))
+        })
+      }
+
       .plot_distribution_v2(result, plots_dir, lang, min_records)
       if (verbose) cli::cli_alert_success(paste0("Plots saved to: ", plots_dir))
     }, error = function(e) {
@@ -795,6 +818,38 @@ orm_report <- function(result,
   else "",
   '</div>
 
+  <!-- ASS distribution -->
+  <div class="section">
+    <h2>', if(is_es) "Suficiencia de los abstracts (ASS)"
+           else "Abstract Sufficiency Score (ASS)", '</h2>
+    <div class="alert-box">',
+      if(is_es)
+        "El ASS mide cuanta informacion preventivamente util contiene cada abstract (0 = no informativo · 5 = exposicion + poblacion + metodo + prevencion)."
+      else
+        "The ASS measures how much preventively useful information each abstract contains (0 = non-informative · 5 = exposure + population + method + prevention).",
+    '</div>',
+  if (plots_exist && file.exists(file.path(out_dir, "plots", "ass_distribution.png"))) paste0('
+    <div class="plot-full"><img src="plots/ass_distribution.png"
+      alt="ASS distribution"></div>')
+  else "",
+  '</div>
+
+  <!-- Risk x Dimension heatmap -->
+  <div class="section">
+    <h2>', if(is_es) "Focos de riesgo por bloque normativo"
+           else "OHS Risk Focus by Normative Block", '</h2>
+    <div class="alert-box">',
+      if(is_es)
+        "Matriz de co-ocurrencia entre categorias de riesgo y bloques normativos (A-Seguridad, B-Higiene, C-Ergonomia, D-Psicosociologia, E-Biologico, F-Tecnologias emergentes)."
+      else
+        "Co-occurrence matrix between risk categories and normative blocks (A-Safety, B-Hygiene, C-Ergonomics, D-Psychosociology, E-Biological, F-Emerging technologies).",
+    '</div>',
+  if (plots_exist && file.exists(file.path(out_dir, "plots", "risk_dimension_heatmap.png"))) paste0('
+    <div class="plot-full"><img src="plots/risk_dimension_heatmap.png"
+      alt="', if(is_es) "Focos de riesgo" else "Risk focus by block", '"></div>')
+  else "",
+  '</div>
+
   <!-- Gap table -->
   <div class="section">
     <h2>', if(is_es) "Lagunas criticas detectadas (WRDI >= 0.7)"
@@ -848,35 +903,3 @@ orm_report <- function(result,
   writeLines(html, path, useBytes = FALSE)
   invisible(path)
 }
-
-.build_prisma_log <- function(result, lang) {
-  ps <- attr(result, 'pipeline_summary')
-  data.frame(
-    phase = c('Records identified','Duplicates removed',
-              'Records after deduplication','Records screened',
-              'Records included in analysis'),
-    n = c(
-      if (!is.null(ps)) ps$n_loaded  else result$n_records,
-      if (!is.null(ps)) ps$n_removed else 0L,
-      if (!is.null(ps)) ps$n_deduped else result$n_records,
-      if (!is.null(ps)) ps$n_deduped else result$n_records,
-      result$n_records
-    ),
-    stringsAsFactors = FALSE
-  )
-}
-
-.build_certificate <- function(result) {
-  list(
-    orisma_version = as.character(utils::packageVersion('orisma')),
-    analysis_date  = format(Sys.time(), '%Y-%m-%d %H:%M:%S'),
-    n_records      = result$n_records,
-    n_categories   = result$n_categories,
-    WRDI_global    = result$WRDI_global,
-    r_version      = paste(R.Version()$major, R.Version()$minor, sep='.'),
-    platform       = R.Version()$platform,
-    digest_matrix  = digest::digest(result$matrix, algo='md5'),
-    digest_refs    = digest::digest(result$refs, algo='md5')
-  )
-}
-
