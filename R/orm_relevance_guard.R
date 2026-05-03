@@ -86,8 +86,28 @@ orm_relevance_guard <- function(data,
           "\\bhrc\\b",
           "industrial robot[s]?",
           "robotic automation",
+          "advanced robotics",
+          "advanced robotic[s]?",
+          "robotic manipulation",
+          "robotic inspection",
+          "robotic intervention[s]?",
+          "robotic system[s]?",
+          "robotic platform[s]?",
+          "robotic technolog[y|ies]",
+          "robotic[s]?",
           "autonomous mobile robot[s]?",
           "\\bamr\\b",
+          "human[- ]?machine collaboration",
+          "human.machine collaboration",
+          "human[- ]?machine interaction",
+          "human.machine interaction",
+          "industry 5\\.0",
+          "tele[- ]?operation",
+          "teleoperation",
+          "teleoperated",
+          "hazard detection",
+          "hazardous environment[s]?",
+          "inspection robot[s]?",
           "automation"
         ),
         collapse = "|"
@@ -156,7 +176,21 @@ orm_relevance_guard <- function(data,
         "field study",
         "on-site",
         "onsite",
-        "work environment"
+        "work environment",
+        "hazard detection",
+        "hazardous environment",
+        "inspection",
+        "maintenance",
+        "decommissioning",
+        "pipeline",
+        "nuclear",
+        "safety and efficiency",
+        "product safety",
+        "compliance engineering",
+        "injury prevention",
+        "risk reduction",
+        "human-machine collaboration",
+        "industry 5.0"
       ),
       collapse = "|"
     )
@@ -223,17 +257,27 @@ orm_relevance_guard <- function(data,
   # - Records with both topic and occupational relevance are retained, even if they contain
   #   biomedical terms, because robotics, rehabilitation, healthcare and wearable-sensor
   #   studies may still be relevant for occupational ergonomics or prevention.
-  exclusion_flag <- (!topic_relevant) |
-    (topic_relevant & !occupational_relevant) |
-    (biomedical_noise & !occupational_relevant & !strong_occupational)
+  # Conservative exclusion logic:
+  # - Records outside the target topic are excluded.
+  # - Topic-related records are retained even if the occupational context is weak,
+  #   but they are flagged for review.
+  # - Biomedical/clinical records are excluded only when they lack topic relevance
+  #   or have no occupational/safety signal.
+  weak_occupational_context <- topic_relevant & !occupational_relevant
+  biomedical_review <- biomedical_noise & occupational_relevant & topic_relevant
+  weak_context_review <- weak_occupational_context & !biomedical_noise
 
-  review_flag <- biomedical_noise & occupational_relevant & topic_relevant
+  exclusion_flag <- (!topic_relevant) |
+    (biomedical_noise & !topic_relevant) |
+    (biomedical_noise & !occupational_relevant & !strong_occupational & !topic_relevant)
+
+  review_flag <- biomedical_review | weak_context_review
 
   exclusion_reason <- rep("included", length(txt_low))
   exclusion_reason[!topic_relevant] <- "not related to target topic"
-  exclusion_reason[topic_relevant & !occupational_relevant] <- "topic-related but no clear occupational context"
-  exclusion_reason[biomedical_noise & !occupational_relevant & !strong_occupational] <- "likely biomedical/clinical/non-occupational noise"
-  exclusion_reason[review_flag] <- "included but flagged for biomedical/clinical review"
+  exclusion_reason[weak_context_review] <- "included but flagged for weak occupational context"
+  exclusion_reason[biomedical_noise & !occupational_relevant & !strong_occupational & !topic_relevant] <- "likely biomedical/clinical/non-occupational noise"
+  exclusion_reason[biomedical_review] <- "included but flagged for biomedical/clinical review"
   exclusion_reason[topic_relevant & occupational_relevant & !biomedical_noise] <- "included"
 
   data$topic_relevant <- topic_relevant
