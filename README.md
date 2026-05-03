@@ -8,8 +8,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
-`orisma` is an R package that automates the complete pipeline for **systematic bibliometric mapping of occupational risk evidence** in any domain — emerging technologies, established hazards, or specific industrial sectors. It produces both **academic outputs** (indicators, visualisations, reproducibility certificates) and **practitioner outputs** (risk sheets, priority rankings, guided extraction matrices).
-
 `orisma` is an R package for **systematic bibliometric mapping of occupational risk evidence**.
 
 It is designed for researchers, occupational safety and health professionals, industrial hygienists, ergonomists, psychosocial risk specialists and prevention practitioners who need to understand whether the scientific literature on a given topic is actually connected to **workers, workplaces, exposure conditions and preventive decision-making**.
@@ -38,6 +36,7 @@ It helps answer questions such as:
 - Which records are probably off-topic, biomedical, clinical or weakly occupational and should be reviewed manually?
 
 ---
+
 ## What does ORISMA do?
 
 Starting from reference files exported from major bibliographic databases such as Web of Science, Scopus, PubMed, Dimensions, EBSCO and others, `orisma` runs a complete workflow.
