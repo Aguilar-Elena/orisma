@@ -14,7 +14,7 @@ It is designed for researchers, occupational safety and health professionals, in
 
 Unlike general bibliometric tools, `orisma` focuses on the **preventive usefulness** of scientific evidence. It does not only count publications or keywords. It helps identify whether a research field is technically abundant but weakly connected to real occupational exposure, workplace tasks or preventive action.
 
----
+<hr>
 
 ## Why ORISMA?
 
@@ -35,7 +35,7 @@ It helps answer questions such as:
 - Which risks require on-site assessment because the literature lacks worker-level evidence?
 - Which records are probably off-topic, biomedical, clinical or weakly occupational and should be reviewed manually?
 
----
+<hr>
 
 ## What does ORISMA do?
 
@@ -52,7 +52,7 @@ Processing time depends on corpus size, file format, deduplication complexity an
 7. **Priority ranking** — identifies articles with higher preventive usefulness.
 8. **Reports** — generates bilingual HTML reports, practitioner risk sheets, extraction matrices and validation samples.
 
----
+<hr>
 
 ## Main preventive bibliometric indicators
 
@@ -64,7 +64,7 @@ Processing time depends on corpus size, file format, deduplication complexity an
 | **ASS** | Abstract Sufficiency Score | Amount of preventively useful information contained in each abstract, scored from 0 to 5 |
 | **Bridge score** | Bridge Article Score | Degree to which a study connects technical science with applied occupational prevention |
 
----
+<hr>
 
 ## Worker-Risk Disconnection Index (WRDI)
 
@@ -80,7 +80,7 @@ A high WRDI suggests that the literature is technically developed but weakly con
 
 WRDI is not a substitute for expert judgement. It is a signal that helps prioritise deeper review.
 
----
+<hr>
 
 ## Risk Category Saturation Index (RCS)
 
@@ -93,7 +93,7 @@ It helps identify:
 - risk areas where literature volume may not match preventive relevance;
 - potential evidence gaps.
 
----
+<hr>
 ## Material-Gap Profile (MGP)
 
 The **Material-Gap Profile** is designed for corpora where records can be stratified by material, substance or agent.
@@ -110,7 +110,7 @@ This is especially useful for topics such as:
 - biological agents;
 - emerging technologies.
 
----
+<hr>
 
 ## Abstract Sufficiency Score (ASS)
 
@@ -127,7 +127,7 @@ The **ASS** is a cumulative 0-5 score measuring how much preventively useful inf
 
 The ASS is not a measure of study quality. It is a measure of how informative the abstract is for occupational prevention.
 
----
+<hr>
 
 ## Bridge articles
 
@@ -143,7 +143,7 @@ It usually combines:
 
 Bridge articles are useful because they help practitioners move from general scientific evidence to concrete preventive action.
 
----
+<hr>
 
 ## Installation
 
@@ -156,7 +156,7 @@ install.packages("orisma")
 remotes::install_github("Aguilar-Elena/orisma")
 ```
 
----
+<hr>
 
 ## Minimal usage — 3 lines
 
@@ -177,7 +177,7 @@ result <- orm_run(refs)
 orm_report(result, lang = "es", out_dir = "resultados/")
 ```
 
----
+<hr>
 
 ## Complete function reference
 
@@ -203,7 +203,7 @@ orm_report(result, lang = "es", out_dir = "resultados/")
 | `orm_validate()` | Researcher | Manual validation sample |
 | `orm_dict()` | Everyone | Load or customise the risk dictionary |
 
----
+<hr>
 
 ## Outputs generated automatically
 
@@ -227,7 +227,7 @@ After running `orm_report()` and `orm_risk_sheet()`:
 | `orisma_extraction_matrix.csv` | Pre-filled extraction template for PDF review |
 | `orisma_priority_ranking.csv` | Top-20 priority articles by bridge + ASS score |
 | `orisma_validation_sample.csv`| Manual validation sample |
----
+<hr>
 
 ## Risk dictionary
 
@@ -259,7 +259,7 @@ dict <- orm_dict_add_category(dict,
 )
 ```
 
----
+<hr>
 
 ## Supported databases
 
@@ -278,7 +278,7 @@ dict <- orm_dict_add_category(dict,
 
 Export all databases in **RIS format**, place files in a folder, and run `orm_load("folder/")`. ORISMA detects the source database automatically from the filename.
 
----
+<hr>
 
 ## Abstract Sufficiency Score (ASS)
 
@@ -293,7 +293,7 @@ The ASS is a cumulative 0-5 index measuring how much preventively useful informa
 | 4 | Mentions exposure in workers with a result |
 | 5 | Complete: exposure + worker population + method + prevention |
 
----
+<hr>
 
 ## Bridge articles
 
@@ -308,7 +308,7 @@ A **bridge article** connects technical science with applied OHS prevention. It 
 Articles meeting 4-5 criteria = **Strong bridge** (highest priority for reading).
 Articles meeting 3 criteria (must include workers + measurement) = **Partial bridge**.
 
----
+<hr>
 
 ## Methodological note
 
@@ -316,7 +316,7 @@ ORISMA uses dictionary-based automatic classification. This may produce false po
 
 ORISMA does not include country-specific regulations or limit values, as these vary by jurisdiction. The practitioner applies the relevant national/regional regulation based on the risk categories identified.
 
----
+<hr>
 
 ## Limitations
 
@@ -330,7 +330,7 @@ Country-specific legal requirements, occupational exposure limits and regulatory
 
 
 
----
+<hr>
 
 ## Citation
 
@@ -343,7 +343,7 @@ Universidad Internacional de Valencia (VIU) & Universidad de Salamanca (USAL).
 https://github.com/Aguilar-Elena/orisma
 ```
 
----
+<hr>
 
 ## Authors
 
@@ -354,7 +354,7 @@ Universidad Internacional de Valencia (VIU), Valencia, Spain
 **Ana Delgado-Garcia** &middot; a.delgado@usal.es  
 Universidad de Salamanca (USAL), Salamanca, Spain
 
----
+<hr>
 
 ## License
 
