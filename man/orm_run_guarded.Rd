@@ -12,6 +12,7 @@ orm_run_guarded(
   topic_regex = NULL,
   occupational_regex = NULL,
   noise_regex = NULL,
+  mode = c("conservative", "flag", "strict"),
   ...
 )
 }
@@ -31,6 +32,11 @@ filter leaves fewer records, the function stops to avoid accidental over-filteri
 \item{occupational_regex}{Optional occupational relevance regex.}
 
 \item{noise_regex}{Optional noise regex.}
+
+\item{mode}{Relevance filtering mode. \code{"flag"} excludes only records outside
+the target topic and marks uncertain records for review. \code{"conservative"}
+excludes off-topic and likely non-occupational biomedical/clinical records.
+\code{"strict"} also excludes records with weak occupational context.}
 
 \item{...}{Additional arguments passed to \code{orm_run()}.}
 }

@@ -12,7 +12,8 @@ orm_relevance_guard(
   noise_regex = NULL,
   title_col = NULL,
   abstract_col = NULL,
-  keywords_col = NULL
+  keywords_col = NULL,
+  mode = c("conservative", "flag", "strict")
 )
 }
 \arguments{
@@ -31,6 +32,11 @@ orm_relevance_guard(
 \item{abstract_col}{Optional abstract column name. If \code{NULL}, it is detected automatically.}
 
 \item{keywords_col}{Optional keywords column name. If \code{NULL}, it is detected automatically.}
+
+\item{mode}{Relevance filtering mode. \code{"flag"} excludes only records outside
+the target topic and marks uncertain records for review. \code{"conservative"}
+excludes off-topic and likely non-occupational biomedical/clinical records.
+\code{"strict"} also excludes records with weak occupational context.}
 }
 \value{
 The input data frame with additional relevance-control columns.

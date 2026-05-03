@@ -14,6 +14,10 @@
 #' @param topic_regex Optional topic regex.
 #' @param occupational_regex Optional occupational relevance regex.
 #' @param noise_regex Optional noise regex.
+#' @param mode Relevance filtering mode. `"flag"` excludes only records outside
+#' the target topic and marks uncertain records for review. `"conservative"`
+#' excludes off-topic and likely non-occupational biomedical/clinical records.
+#' `"strict"` also excludes records with weak occupational context.
 #' @param ... Additional arguments passed to `orm_run()`.
 #'
 #' @return An ORISMA result object with an added `relevance_guard` component.
@@ -25,7 +29,10 @@ orm_run_guarded <- function(refs,
                             topic_regex = NULL,
                             occupational_regex = NULL,
                             noise_regex = NULL,
+                            mode = c("conservative", "flag", "strict"),
                             ...) {
+
+  mode <- match.arg(mode)
 
   if (!is.data.frame(refs)) {
     stop("`refs` must be a data frame. Use orm_load() first.", call. = FALSE)
@@ -36,7 +43,8 @@ orm_run_guarded <- function(refs,
     topic = topic,
     topic_regex = topic_regex,
     occupational_regex = occupational_regex,
-    noise_regex = noise_regex
+    noise_regex = noise_regex,
+    mode = mode
   )
 
   relevance_summary <- data.frame(
@@ -46,7 +54,8 @@ orm_run_guarded <- function(refs,
       "occupational_relevant",
       "biomedical_noise",
       "excluded_by_guard",
-      "records_after_guard"
+      "records_after_guard",
+      "guard_mode"
     ),
     value = c(
       nrow(guarded),
@@ -54,11 +63,13 @@ orm_run_guarded <- function(refs,
       sum(guarded$occupational_relevant, na.rm = TRUE),
       sum(guarded$biomedical_noise, na.rm = TRUE),
       sum(guarded$exclusion_flag, na.rm = TRUE),
-      sum(!guarded$exclusion_flag, na.rm = TRUE)
+      sum(!guarded$exclusion_flag, na.rm = TRUE),
+      mode
     )
   )
 
   message("ORISMA relevance guard")
+  message("Mode: ", mode)
   message("Records before guard: ", nrow(guarded))
   message("Records excluded: ", sum(guarded$exclusion_flag, na.rm = TRUE))
   message("Records retained: ", sum(!guarded$exclusion_flag, na.rm = TRUE))
@@ -91,7 +102,8 @@ orm_run_guarded <- function(refs,
     exclude_non_relevant = exclude_non_relevant,
     topic_regex = topic_regex,
     occupational_regex = occupational_regex,
-    noise_regex = noise_regex
+    noise_regex = noise_regex,
+    mode = mode
   )
 
   result

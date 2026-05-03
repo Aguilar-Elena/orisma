@@ -14,6 +14,10 @@
 #' @param title_col Optional title column name. If `NULL`, it is detected automatically.
 #' @param abstract_col Optional abstract column name. If `NULL`, it is detected automatically.
 #' @param keywords_col Optional keywords column name. If `NULL`, it is detected automatically.
+#' @param mode Relevance filtering mode. `"flag"` excludes only records outside
+#' the target topic and marks uncertain records for review. `"conservative"`
+#' excludes off-topic and likely non-occupational biomedical/clinical records.
+#' `"strict"` also excludes records with weak occupational context.
 #'
 #' @return The input data frame with additional relevance-control columns.
 #' @export
@@ -24,7 +28,10 @@ orm_relevance_guard <- function(data,
                                 noise_regex = NULL,
                                 title_col = NULL,
                                 abstract_col = NULL,
-                                keywords_col = NULL) {
+                                keywords_col = NULL,
+                                mode = c("conservative", "flag", "strict")) {
+
+  mode <- match.arg(mode)
 
   if (!is.data.frame(data)) {
     stop("`data` must be a data frame.", call. = FALSE)
@@ -257,29 +264,48 @@ orm_relevance_guard <- function(data,
   # - Records with both topic and occupational relevance are retained, even if they contain
   #   biomedical terms, because robotics, rehabilitation, healthcare and wearable-sensor
   #   studies may still be relevant for occupational ergonomics or prevention.
-  # Conservative exclusion logic:
-  # - Records outside the target topic are excluded.
-  # - Topic-related records are retained even if the occupational context is weak,
-  #   but they are flagged for review.
-  # - Biomedical/clinical records are excluded only when they lack topic relevance
-  #   or have no occupational/safety signal.
   weak_occupational_context <- topic_relevant & !occupational_relevant
   biomedical_review <- biomedical_noise & occupational_relevant & topic_relevant
   weak_context_review <- weak_occupational_context & !biomedical_noise
 
-  exclusion_flag <- (!topic_relevant) |
-    (biomedical_noise & !topic_relevant) |
-    (biomedical_noise & !occupational_relevant & !strong_occupational & !topic_relevant)
+  if (mode == "flag") {
 
-  review_flag <- biomedical_review | weak_context_review
+    # Exploratory mode:
+    # Exclude only records outside the target topic. Keep uncertain records and
+    # label them for review.
+    exclusion_flag <- !topic_relevant
+
+  } else if (mode == "conservative") {
+
+    # Balanced default:
+    # Exclude records outside the target topic and biomedical/clinical records
+    # without occupational or strong occupational signal. Keep biomedical overlap
+    # when there is an occupational signal, but flag it for review.
+    exclusion_flag <- (!topic_relevant) |
+      (biomedical_noise & !occupational_relevant & !strong_occupational)
+
+  } else if (mode == "strict") {
+
+    # Technical screening mode:
+    # Exclude records outside the target topic, records with weak occupational
+    # context, and biomedical/clinical records without strong occupational signal.
+    exclusion_flag <- (!topic_relevant) |
+      weak_occupational_context |
+      (biomedical_noise & !strong_occupational)
+
+  }
+
+  review_flag <- (biomedical_review | weak_context_review) & !exclusion_flag
 
   exclusion_reason <- rep("included", length(txt_low))
   exclusion_reason[!topic_relevant] <- "not related to target topic"
-  exclusion_reason[weak_context_review] <- "included but flagged for weak occupational context"
-  exclusion_reason[biomedical_noise & !occupational_relevant & !strong_occupational & !topic_relevant] <- "likely biomedical/clinical/non-occupational noise"
-  exclusion_reason[biomedical_review] <- "included but flagged for biomedical/clinical review"
+  exclusion_reason[weak_context_review & !exclusion_flag] <- "included but flagged for weak occupational context"
+  exclusion_reason[biomedical_noise & !occupational_relevant & !strong_occupational & exclusion_flag] <- "likely biomedical/clinical/non-occupational noise"
+  exclusion_reason[biomedical_review & !exclusion_flag] <- "included but flagged for biomedical/clinical review"
+  exclusion_reason[weak_occupational_context & exclusion_flag] <- "topic-related but no clear occupational context"
   exclusion_reason[topic_relevant & occupational_relevant & !biomedical_noise] <- "included"
 
+  data$relevance_guard_mode <- mode
   data$topic_relevant <- topic_relevant
   data$occupational_relevant <- occupational_relevant
   data$biomedical_noise <- biomedical_noise
