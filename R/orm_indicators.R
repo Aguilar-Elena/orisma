@@ -9,7 +9,7 @@
 #' Three are corpus-level indicators (WRDI, RCS, MGP) and two are
 #' record-level indicators (ASS, Bridge Score).
 #'
-#' ---
+#'
 #'
 #' ## 1. Worker-Risk Disconnection Index (WRDI)
 #'
@@ -50,7 +50,7 @@
 #' measured worker exposure but did not mention it in the abstract may
 #' be misclassified. Manual validation via [orm_validate()] is recommended.
 #'
-#' ---
+#'
 #'
 #' ## 2. Risk Category Saturation Index (RCS)
 #'
@@ -88,12 +88,12 @@
 #' absolute studies if the corpus is small or highly specialised. Always
 #' interpret RCS together with the absolute number of records (N).
 #'
-#' ---
+#'
 #'
 #' ## 3. Material-Gap Profile (MGP)
 #'
 #' ### Definition
-#' The MGP is domain-specific indicator designed for corpora where the
+#' The MGP is a domain-specific indicator designed for corpora where the
 #' corpus can be stratified by material, substance, or agent. It measures
 #' the ratio between a material's known hazard potential and its coverage
 #' in the occupational health literature, identifying materials that are
@@ -116,7 +116,7 @@
 #'   [orm_analyse()] must point to a column classifying each record by
 #'   material or agent. If not available, MGP is not computed.
 #'
-#' ---
+#'
 #'
 #' ## 4. Abstract Sufficiency Score (ASS)
 #'
@@ -168,7 +168,7 @@
 #' - **ASS = 5 articles**: These are the most valuable abstracts for
 #'   practitioners and should be read in full first.
 #'
-#' ---
+#'
 #'
 #' ## 5. Bridge Article Score
 #'
@@ -217,7 +217,7 @@
 #' record. Bridge score is weighted highest because it reflects the most
 #' direct preventive relevance.
 #'
-#' ---
+#'
 #'
 #' ## References
 #'
