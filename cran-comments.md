@@ -14,6 +14,7 @@ Encoding: UTF-8 in DESCRIPTION.
 ## Test environments
 
 * Local macOS, R 4.4.0
+* win-builder, R-devel, Windows Server 2022
 * GitHub Actions:
   - macOS-latest, R release
   - windows-latest, R release
@@ -23,3 +24,7 @@ Encoding: UTF-8 in DESCRIPTION.
 ## GitHub Actions
 
 R CMD check completed successfully on GitHub Actions.
+
+## Submission
+
+This is the initial CRAN submission.
