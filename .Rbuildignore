@@ -2,3 +2,12 @@
 ^Meta$
 ^cran-comments\.md$
 ^\.github$
+^\.DS_Store$
+^\.Rhistory$
+^cran_audit\.R$
+^cran_audit_log\.txt$
+^document_log\.txt$
+^rcmdcheck_log\.txt$
+^.*\.log$
+^.*\.Rcheck$
+^.*\.tar\.gz$
