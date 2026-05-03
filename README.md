@@ -10,41 +10,139 @@
 
 `orisma` is an R package that automates the complete pipeline for **systematic bibliometric mapping of occupational risk evidence** in any domain — emerging technologies, established hazards, or specific industrial sectors. It produces both **academic outputs** (indicators, visualisations, reproducibility certificates) and **practitioner outputs** (risk sheets, priority rankings, guided extraction matrices).
 
+`orisma` is an R package for **systematic bibliometric mapping of occupational risk evidence**.
+
+It is designed for researchers, occupational safety and health professionals, industrial hygienists, ergonomists, psychosocial risk specialists and prevention practitioners who need to understand whether the scientific literature on a given topic is actually connected to **workers, workplaces, exposure conditions and preventive decision-making**.
+
+Unlike general bibliometric tools, `orisma` focuses on the **preventive usefulness** of scientific evidence. It does not only count publications or keywords. It helps identify whether a research field is technically abundant but weakly connected to real occupational exposure, workplace tasks or preventive action.
+
 ---
 
+## Why ORISMA?
+
+Emerging technologies, new work processes and complex occupational hazards often generate a large scientific literature before their real workplace risks are fully understood.
+
+This creates a practical and methodological problem:
+
+> A topic may appear well studied, but the available evidence may still lack data on workers, real exposure conditions, tasks, sectors, controls or preventive recommendations.
+
+`orisma` was created to detect this gap.
+
+It helps answer questions such as:
+
+- Is the literature technically abundant but weakly connected to real workers?
+- Which occupational risk categories are over-represented or under-represented?
+- Which articles are most useful for occupational risk assessment?
+- Which studies connect technical science with applied prevention?
+- Which risks require on-site assessment because the literature lacks worker-level evidence?
+- Which records are probably off-topic, biomedical, clinical or weakly occupational and should be reviewed manually?
+
+---
 ## What does ORISMA do?
 
-Starting from reference files exported from any major bibliographic database (Web of Science, Scopus, PubMed, Dimensions, EBSCO, and others), `orisma` runs a fully automated pipeline in **2-3 seconds**:
+Starting from reference files exported from major bibliographic databases such as Web of Science, Scopus, PubMed, Dimensions, EBSCO and others, `orisma` runs a complete workflow.
 
-1. **Ingestion** — reads RIS, BibTeX and CSV files from multiple databases simultaneously
-2. **Deduplication** — three-step pipeline (exact DOI → normalised title → fuzzy match)
-3. **Risk extraction** — scans abstracts against a 58-category normative dictionary (ISO 45001 / INSST / NIOSH / EU-OSHA)
-4. **Bibliometric analysis** — co-occurrence matrices, temporal trends, hierarchical clustering
-5. **Original indicators** — WRDI, RCS, MGP (see below)
-6. **Dimension detection** — automatic discovery of corpus dimensions (normative blocks or free text)
-7. **Abstract Sufficiency Score** — 0-5 index of preventive usefulness per abstract
-8. **Bridge article detection** — identifies articles connecting technical science with applied prevention
-9. **Priority ranking** — top articles for practitioner reading
-10. **Reports** — bilingual HTML reports (EN/ES), risk sheets, guided extraction matrices, reproducibility certificates
+Processing time depends on corpus size, file format, deduplication complexity and the number of risk categories analysed.
 
----
-
-## Three original bibliometric indicators
-
-| Indicator | Full name | What it measures |
-|---|---|---|
-| **WRDI** | Worker-Risk Disconnection Index | Proportion of studies characterising a risk without measuring real worker exposure |
-| **RCS** | Risk Category Saturation Index | Relative dominance of each risk category vs. a uniform baseline |
-| **MGP** | Material-Gap Profile | Ratio between a material's known hazard potential and its coverage in the literature |
+1. **Ingestion** — reads RIS, BibTeX and CSV files from multiple databases.
+2. **Deduplication** — applies a three-step pipeline: exact DOI, normalised title and fuzzy matching.
+3. **Relevance guard** — flags or excludes records with weak topic or occupational relevance.
+4. **Risk extraction** — scans titles, abstracts and keywords against a 58-category occupational risk dictionary.
+5. **Bibliometric analysis** — generates matrices, temporal trends, co-occurrence structures and risk distributions.
+6. **Preventive indicators** — computes WRDI, RCS, MGP, ASS and Bridge Article Score.
+7. **Priority ranking** — identifies articles with higher preventive usefulness.
+8. **Reports** — generates bilingual HTML reports, practitioner risk sheets, extraction matrices and validation samples.
 
 ---
 
-## Two new preventive intelligence indicators
+## Main preventive bibliometric indicators
 
 | Indicator | Full name | What it measures |
 |---|---|---|
-| **ASS** | Abstract Sufficiency Score (0-5) | How much preventively useful information an abstract contains for an OHS practitioner |
-| **Bridge score** | Bridge Article Score (0-5) | Degree to which a study connects technical science with applied OHS prevention |
+| **WRDI** | Worker-Risk Disconnection Index | Proportion of studies characterising a risk without direct worker exposure data |
+| **RCS** | Risk Category Saturation Index | Relative dominance of each risk category compared with a uniform baseline |
+| **MGP** | Material-Gap Profile | Ratio between a material's hazard potential and its coverage in the occupational health literature |
+| **ASS** | Abstract Sufficiency Score | Amount of preventively useful information contained in each abstract, scored from 0 to 5 |
+| **Bridge score** | Bridge Article Score | Degree to which a study connects technical science with applied occupational prevention |
+
+---
+
+## Worker-Risk Disconnection Index (WRDI)
+
+The **Worker-Risk Disconnection Index** measures the proportion of studies that characterise a risk without reporting direct data on workers or workplace exposure.
+
+A high WRDI suggests that the literature is technically developed but weakly connected to real working conditions.
+
+| WRDI value | Interpretation |
+|---|---|
+| 0.00-0.30 | Reasonable connection with worker-level evidence |
+| 0.30-0.70 | Partial disconnection; manual review recommended |
+| 0.70-1.00 | High technical-worker disconnection; on-site assessment is especially important |
+
+WRDI is not a substitute for expert judgement. It is a signal that helps prioritise deeper review.
+
+---
+
+## Risk Category Saturation Index (RCS)
+
+The **Risk Category Saturation Index** measures whether a risk category is over-represented or under-represented compared with a uniform distribution across the dictionary.
+
+It helps identify:
+
+- dominant risk categories in the corpus;
+- under-studied risk categories;
+- risk areas where literature volume may not match preventive relevance;
+- potential evidence gaps.
+
+---
+## Material-Gap Profile (MGP)
+
+The **Material-Gap Profile** is designed for corpora where records can be stratified by material, substance or agent.
+
+It helps identify materials or agents that appear hazardous but remain poorly covered in the occupational health literature.
+
+This is especially useful for topics such as:
+
+- metal additive manufacturing;
+- nanomaterials;
+- battery manufacturing;
+- advanced materials;
+- chemical agents;
+- biological agents;
+- emerging technologies.
+
+---
+
+## Abstract Sufficiency Score (ASS)
+
+The **ASS** is a cumulative 0-5 score measuring how much preventively useful information an abstract contains.
+
+| Score | Meaning |
+|---|---|
+| 0 | Non-informative for OHS purposes |
+| 1 | Mentions a hazard but no occupational context |
+| 2 | Mentions occupational or workplace context |
+| 3 | Mentions exposure measurement or quantification |
+| 4 | Mentions worker exposure with a result |
+| 5 | Complete preventive abstract: worker population, exposure measurement, method and prevention |
+
+The ASS is not a measure of study quality. It is a measure of how informative the abstract is for occupational prevention.
+
+---
+
+## Bridge articles
+
+A **bridge article** connects technical science with applied occupational prevention.
+
+It usually combines:
+
+1. A technology, process or work task.
+2. A hazardous agent or risk factor.
+3. A real worker population or workplace setting.
+4. Exposure measurement or workplace assessment.
+5. Preventive recommendations or control measures.
+
+Bridge articles are useful because they help practitioners move from general scientific evidence to concrete preventive action.
 
 ---
 
@@ -86,22 +184,25 @@ orm_report(result, lang = "es", out_dir = "resultados/")
 
 | Function | For whom | What it does |
 |---|---|---|
-| `orm_load()` | Everyone | Multi-source ingestion (RIS, BibTeX, CSV) with format auto-detection |
-| `orm_dedup()` | Everyone | 3-step deduplication (DOI + title + fuzzy) |
-| `orm_extract()` | Researcher | Risk category extraction via normative dictionary |
-| `orm_analyse()` | Researcher | Compute WRDI, RCS, MGP indicators |
-| `orm_autodim()` | Researcher | Automatic dimension discovery (blocks or free text) |
-| `orm_dim_matrix()` | Researcher | Risk x dimension cross-heatmap |
-| `orm_ass()` | Both | Abstract Sufficiency Score (0-5) per record |
+| `orm_load()` | Everyone | Multi-source ingestion with format auto-detection |
+| `orm_dedup()` | Everyone | Three-step deduplication: DOI, title and fuzzy matching |
+| `orm_relevance_guard()` | Both | Flags or excludes records with weak topic or occupational relevance |
+| `orm_extract()` | Researcher | Risk category extraction via occupational risk dictionary |
+| `orm_analyse()` | Researcher | Computes WRDI, RCS and MGP |
+| `orm_autodim()` | Researcher | Automatic dimension discovery |
+| `orm_dim_matrix()` | Researcher | Risk x dimension heatmap |
+| `orm_ass()` | Both | Abstract Sufficiency Score per record |
+| `orm_ass_plot()` | Both | ASS distribution plot |
 | `orm_bridge()` | Both | Bridge article detection and classification |
-| `orm_ranking()` | Both | Priority reading list by combined score |
-| `orm_priority()` | Both | Traffic light classification RED/AMBER/GREEN/GREY |
-| `orm_run()` | Everyone | **Complete pipeline in one call** |
-| `orm_report()` | Researcher | Full HTML report with 7 visualisations |
-| `orm_risk_sheet()` | OHS practitioner | Actionable risk sheet (regulation-neutral) |
+| `orm_ranking()` | Both | Priority reading list |
+| `orm_priority()` | Both | RED/AMBER/GREEN/GREY priority classification |
+| `orm_run()` | Everyone | Complete ORISMA pipeline in one call |
+| `orm_run_guarded()` | Everyone | Complete pipeline with relevance-control layer |
+| `orm_report()` | Researcher | Full HTML report with visualisations and tables |
+| `orm_risk_sheet()` | OHS practitioner | Actionable risk sheet |
 | `orm_extraction_matrix()` | Both | Guided extraction template for PDF review |
-| `orm_validate()` | Researcher | Manual validation with Cohen's Kappa |
-| `orm_dict()` | Everyone | Load/customise the 58-category risk dictionary |
+| `orm_validate()` | Researcher | Manual validation sample |
+| `orm_dict()` | Everyone | Load or customise the risk dictionary |
 
 ---
 
@@ -126,21 +227,21 @@ After running `orm_report()` and `orm_risk_sheet()`:
 | `orisma_risk_sheet.html` | Actionable risk sheet with RED/AMBER/GREEN traffic light |
 | `orisma_extraction_matrix.csv` | Pre-filled extraction template for PDF review |
 | `orisma_priority_ranking.csv` | Top-20 priority articles by bridge + ASS score |
-
+| `orisma_validation_sample.csv`| Manual validation sample |
 ---
 
 ## Risk dictionary
 
-The built-in dictionary covers **58 risk categories** in 6 normative blocks:
+The built-in dictionary covers **58 occupational risk categories** in **6 blocks**.
 
-| Block | Categories | Standards |
+| Block | Area | Examples |
 |---|---|---|
-| A — Safety at work | 18 | INSST / ISO 45001 |
-| B — Industrial hygiene | 8 | INSST / NIOSH |
-| C — Ergonomics | 8 | INSST / ISO 45001 |
-| D — Psychosociology | 11 | INSST / ISO 45001 |
-| E — Biological hazards | 5 | EU-OSHA / NIOSH |
-| F — Emerging technologies | 8 | EU-OSHA 2024-2026 |
+| A | Safety at work | Falls, collision, fire, explosion, work equipment |
+| B | Industrial hygiene | Chemical agents, dust, noise, vibration, radiation |
+| C | Ergonomics | Postures, manual handling, repetitive movements, workload |
+| D | Psychosociology | Mental workload, autonomy, social support, violence, harassment |
+| E | Biological hazards | Bacteria, viruses, fungi, parasites, biological agents |
+| F | Emerging technologies | Robotics, AI, nanotechnology, additive manufacturing, wearables |
 
 The dictionary can be extended for any domain:
 
@@ -215,6 +316,20 @@ Articles meeting 3 criteria (must include workers + measurement) = **Partial bri
 ORISMA uses dictionary-based automatic classification. This may produce false positives. Manual validation of a representative sample is recommended using `orm_validate()`, which computes Cohen's Kappa between automatic and manual classification. A Kappa >= 0.7 is acceptable for high-impact journal publication.
 
 ORISMA does not include country-specific regulations or limit values, as these vary by jurisdiction. The practitioner applies the relevant national/regional regulation based on the risk categories identified.
+
+---
+
+## Limitations
+
+ORISMA relies primarily on bibliographic metadata, titles, abstracts and keywords. It may miss information that appears only in the full text.
+
+Automatic classification may produce false positives or false negatives, especially when terms are used differently across disciplines. This is why ORISMA includes a relevance guard and a validation workflow.
+
+WRDI, ASS and Bridge Score should be interpreted as prioritisation and mapping indicators, not as definitive quality assessment tools.
+
+Country-specific legal requirements, occupational exposure limits and regulatory thresholds are not embedded in ORISMA because they vary by jurisdiction. Practitioners should apply the relevant national or regional legislation after identifying the risk categories.
+
+
 
 ---
 
