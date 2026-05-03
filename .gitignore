@@ -29,3 +29,6 @@ tests/testthat/_snaps/
 docs/
 /doc/
 /Meta/
+*.log
+document_log.txt
+rcmdcheck_log.txt
