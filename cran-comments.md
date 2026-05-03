@@ -1,32 +1,25 @@
-## Test environments
-
-* Local: macOS 26.3 (aarch64-apple-darwin20), R 4.4.0
-* GitHub Actions: macOS (release), Ubuntu (release + devel), Windows (release)
-* win-builder: R-devel
-
 ## R CMD check results
 
-0 errors | 0 warnings | 2 notes
+0 errors | 0 warnings | 1 note
 
-### Notes
+* checking data for non-ASCII characters ... NOTE
+  Note: found 5 marked UTF-8 strings
 
-1. "Found the following hidden files and directories: .github"
-   This is the GitHub Actions CI directory. It is intentionally included
-   for continuous integration and is not part of the installed package.
+These UTF-8 strings are intentional and occur in the package example dataset
+(`orisma_sample`). They correspond to scientific abstract text containing
+standard typographic and scientific characters, including the micro symbol,
+typographic quotation marks, en dashes, and ellipses. The package declares
+Encoding: UTF-8 in DESCRIPTION.
 
-2. "unable to verify current time"
-   Network-related note from the check environment. Not a package issue.
+## Test environments
 
-## New submission
+* Local macOS, R 4.4.0
+* GitHub Actions:
+  - macOS-latest, R release
+  - windows-latest, R release
+  - ubuntu-latest, R release
+  - ubuntu-latest, R devel
 
-This is a new submission to CRAN.
+## GitHub Actions
 
-ORISMA provides a complete pipeline for systematic bibliometric mapping
-of occupational health and safety evidence. It implements three original
-bibliometric indicators (WRDI, RCS, MGP) and two preventive intelligence
-indicators (ASS, Bridge Score). The package is domain-agnostic and
-regulation-neutral for global applicability.
-
-The package has been tested on macOS, Ubuntu, and Windows via GitHub
-Actions (see https://github.com/Aguilar-Elena/orisma/actions).
-
+R CMD check completed successfully on GitHub Actions.
