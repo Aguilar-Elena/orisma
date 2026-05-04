@@ -6,46 +6,87 @@
 \alias{orisma}
 \title{orisma: Occupational Risk Integrated Systematic Mapping and Analysis}
 \description{
-A systematic bibliometric pipeline for mapping occupational risk evidence
-in any domain - emerging technologies, established hazards, or specific
-industrial sectors.
-\subsection{Typical workflow}{
+\code{orisma} is an R package for systematic bibliometric mapping of
+occupational risk evidence. It is designed to help researchers and
+occupational safety and health practitioners analyse whether the scientific
+literature on a given topic is connected to workers, workplaces, exposure
+conditions and preventive decision-making.
+}
+\details{
+ORISMA provides a complete workflow for occupational risk evidence mapping:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{library(orisma)
-data   <- orm_load("my_references/")
-result <- orm_run(data)
+\itemize{
+\item multi-source bibliographic ingestion;
+\item deduplication;
+\item relevance filtering through \code{orm_relevance_guard()} and \code{orm_run_guarded()};
+\item risk category extraction using a 58-category occupational risk dictionary;
+\item preventive bibliometric indicators such as WRDI, RCS and MGP;
+\item Abstract Sufficiency Score (ASS);
+\item Bridge Article Score;
+\item bilingual academic reports and practitioner-oriented risk sheets.
+}
+
+Typical workflow:
+
+\preformatted{
+library(orisma)
+
+refs <- orm_load("my_references/")
+
+result <- orm_run_guarded(
+  refs,
+  topic = "Collaborative robotics and occupational health and safety",
+  mode = "conservative"
+)
+
 orm_report(result)
-}\if{html}{\out{</div>}}
+orm_risk_sheet(result)
 }
 }
 \section{Original indicators}{
 
 \itemize{
-\item \strong{WRDI} Worker-Risk Disconnection Index
-\item \strong{RCS} Risk Category Saturation Index
-\item \strong{MGP} Material-Gap Profile
+\item WRDI: Worker-Risk Disconnection Index.
+\item RCS: Risk Category Saturation Index.
+\item MGP: Material-Gap Profile.
+\item ASS: Abstract Sufficiency Score.
+\item Bridge Article Score.
 }
 }
 
 \section{Citation}{
 
-Aguilar-Elena, R. (2025). orisma: Occupational Risk Integrated Systematic
-Mapping and Analysis. R package version 0.1.0.
-Universidad Internacional de Valencia (VIU).
-\url{https://github.com/Aguilar-Elena/orisma}
+Aguilar-Elena, R., & Delgado-Garcia, A. (2026). \code{orisma}:
+Occupational Risk Integrated Systematic Mapping and Analysis.
+R package version 0.1.0. Universidad Internacional de Valencia (VIU)
+& Universidad de Salamanca (USAL).
+https://github.com/Aguilar-Elena/orisma
+}
+
+\section{Author(s)}{
+
+Raul Aguilar-Elena \href{mailto:raguilar@universidadviu.com}{raguilar@universidadviu.com} \cr
+Occupational Risk Prevention and Occupational Health Research Group (GPRL),
+Universidad Internacional de Valencia (VIU), Valencia, Spain. \cr
+
+Ana Delgado-Garcia \href{mailto:a.delgado@usal.es}{a.delgado@usal.es} \cr
+Universidad de Salamanca (USAL), Salamanca, Spain.
 }
 
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/Aguilar-Elena/orisma}
-  \item Report bugs at \url{https://github.com/Aguilar-Elena/orisma/issues}
+\item \url{https://github.com/Aguilar-Elena/orisma}
+\item Report bugs at \url{https://github.com/Aguilar-Elena/orisma/issues}
 }
-
 }
 \author{
-Raul Aguilar-Elena \email{raguilar@universidadviu.com}
+\strong{Maintainer}: Raúl Aguilar Elena \email{raguilar@universidadviu.com} (\href{https://orcid.org/0000-0001-8656-8155}{ORCID})
 
-Occupational Risk Prevention and Occupational Health Research Group (GPRL),
-Universidad Internacional de Valencia (VIU), Valencia, Spain.
+Authors:
+\itemize{
+  \item Ana Delgado-Garcia \email{a.delgado@usal.es}
 }
+
+}
+\keyword{internal}

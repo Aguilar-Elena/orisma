@@ -219,6 +219,8 @@ orm_analyse <- function(mx,
 
 
 #' Print method for orisma_result
+#' @param x An object to print.
+#' @param ... Further arguments passed to or from other methods.
 #' @export
 print.orisma_result <- function(x, ...) {
   cat("\n-- ORISMA Analysis Result --------------------------------\n")

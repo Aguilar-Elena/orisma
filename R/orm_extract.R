@@ -173,6 +173,8 @@ orm_extract <- function(refs,
 
 
 #' Print method for orisma_matrix
+#' @param x An object to print.
+#' @param ... Further arguments passed to or from other methods.
 #' @export
 print.orisma_matrix <- function(x, ...) {
   cat("\n-- ORISMA extraction matrix ------------------------------\n")

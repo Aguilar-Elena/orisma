@@ -13,8 +13,8 @@ internationally recognised taxonomies:
 \item \strong{EU-OSHA} European Agency for Safety and Health at Work
 }
 
-The dictionary covers 56 risk categories organised in 6 blocks:
-A) Safety at work (18), B) Industrial hygiene (7), C) Ergonomics (8),
+The dictionary covers 58 risk categories organised in 6 blocks:
+A) Safety at work (18), B) Industrial hygiene (8), C) Ergonomics (8),
 D) Psychosociology (11), E) Biological hazards (5),
 F) Emerging technologies (8).
 }

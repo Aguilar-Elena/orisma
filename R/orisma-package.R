@@ -1,101 +1,76 @@
 #' orisma: Occupational Risk Integrated Systematic Mapping and Analysis
 #'
 #' @description
-#' A systematic bibliometric pipeline for mapping occupational risk evidence
-#' in any domain - emerging technologies, established hazards, or specific
-#' industrial sectors.
+#' `orisma` is an R package for systematic bibliometric mapping of
+#' occupational risk evidence. It is designed to help researchers and
+#' occupational safety and health practitioners analyse whether the scientific
+#' literature on a given topic is connected to workers, workplaces, exposure
+#' conditions and preventive decision-making.
 #'
-#' ## Typical workflow
+#' @details
+#' ORISMA provides a complete workflow for occupational risk evidence mapping:
 #'
-#' ```r
+#' \itemize{
+#'   \item multi-source bibliographic ingestion;
+#'   \item deduplication;
+#'   \item relevance filtering through `orm_relevance_guard()` and `orm_run_guarded()`;
+#'   \item risk category extraction using a 58-category occupational risk dictionary;
+#'   \item preventive bibliometric indicators such as WRDI, RCS and MGP;
+#'   \item Abstract Sufficiency Score (ASS);
+#'   \item Bridge Article Score;
+#'   \item bilingual academic reports and practitioner-oriented risk sheets.
+#' }
+#'
+#' Typical workflow:
+#'
+#' \preformatted{
 #' library(orisma)
-#' data   <- orm_load("my_references/")
-#' result <- orm_run(data)
+#'
+#' refs <- orm_load("my_references/")
+#'
+#' result <- orm_run_guarded(
+#'   refs,
+#'   topic = "Collaborative robotics and occupational health and safety",
+#'   mode = "conservative"
+#' )
+#'
 #' orm_report(result)
-#' ```
+#' orm_risk_sheet(result)
+#' }
 #'
 #' @section Original indicators:
-#' - **WRDI** Worker-Risk Disconnection Index
-#' - **RCS** Risk Category Saturation Index
-#' - **MGP** Material-Gap Profile
+#' \itemize{
+#'   \item WRDI: Worker-Risk Disconnection Index.
+#'   \item RCS: Risk Category Saturation Index.
+#'   \item MGP: Material-Gap Profile.
+#'   \item ASS: Abstract Sufficiency Score.
+#'   \item Bridge Article Score.
+#' }
 #'
 #' @section Citation:
-#' Aguilar-Elena, R. (2025). orisma: Occupational Risk Integrated Systematic
-#' Mapping and Analysis. R package version 0.1.0.
-#' Universidad Internacional de Valencia (VIU).
-#' \url{https://github.com/Aguilar-Elena/orisma}
+#' Aguilar-Elena, R., & Delgado-Garcia, A. (2026). `orisma`:
+#' Occupational Risk Integrated Systematic Mapping and Analysis.
+#' R package version 0.1.0. Universidad Internacional de Valencia (VIU)
+#' & Universidad de Salamanca (USAL).
+#' https://github.com/Aguilar-Elena/orisma
 #'
-#' @author
-#' Raul Aguilar-Elena \email{raguilar@@universidadviu.com}
-#'
+#' @section Author(s):
+#' Raul Aguilar-Elena <raguilar@universidadviu.com> \cr
 #' Occupational Risk Prevention and Occupational Health Research Group (GPRL),
-#' Universidad Internacional de Valencia (VIU), Valencia, Spain.
+#' Universidad Internacional de Valencia (VIU), Valencia, Spain. \cr
+#'
+#' Ana Delgado-Garcia <a.delgado@usal.es> \cr
+#' Universidad de Salamanca (USAL), Salamanca, Spain.
+#'
+#' @seealso
+#' Useful links:
+#' \itemize{
+#'   \item \url{https://github.com/Aguilar-Elena/orisma}
+#'   \item Report bugs at \url{https://github.com/Aguilar-Elena/orisma/issues}
+#' }
 #'
 #' @docType package
 #' @name orisma-package
 #' @aliases orisma
-"_PACKAGE"
-
-.onLoad <- function(libname, pkgname) {
-  # messages now in R/utils-msg.R
-  op        <- options()
-  op_orisma <- list(
-    orisma.lang    = "en",
-    orisma.verbose = TRUE,
-    orisma.out_dir = "orisma_output",
-    orisma.dict    = "iso45001_insst"
-  )
-  toset <- !(names(op_orisma) %in% names(op))
-  if (any(toset)) options(op_orisma[toset])
-  invisible()
-}
-
-.onAttach <- function(libname, pkgname) {
-  packageStartupMessage(
-    "\norisma v", utils::packageVersion("orisma"),
-    " \u2014 Occupational Risk Integrated Systematic Mapping and Analysis\n",
-    "Author: Dr. Raul Aguilar-Elena \u00b7 GPRL \u00b7 VIU\n",
-    "Docs:   https://github.com/Aguilar-Elena/orisma\n",
-    "Set language: options(orisma.lang = 'es')  # or 'en'\n"
-  )
-}
-
-#' Print an orisma_matrix object
-#' @param x An `orisma_matrix` object.
-#' @param ... Further arguments (ignored).
-#' @return Invisibly returns `x`.
-#' @export
-print.orisma_matrix <- function(x, ...) {
-  cat("\n-- ORISMA extraction matrix --\n")
-  cat(" Records:    ", x$n_records, "\n")
-  cat(" Categories: ", ncol(x$matrix), "\n")
-  cat(" Fields used:", paste(x$fields_used, collapse = ", "), "\n")
-  cat(" Empty records (no category matched):", x$n_empty, "\n")
-  coverage <- colSums(x$matrix)
-  pct      <- round(100 * coverage / x$n_records, 1)
-  cat_info  <- data.frame(Category = x$categories$label, N = coverage,
-                           Pct = pct, check.names = FALSE)
-  print(cat_info[order(-cat_info$N), ], row.names = FALSE)
-  invisible(x)
-}
-
-#' Print an orisma_result object
-#' @param x An `orisma_result` object.
-#' @param ... Further arguments (ignored).
-#' @return Invisibly returns `x`.
-#' @export
-print.orisma_result <- function(x, ...) {
-  cat("\n-- ORISMA Analysis Result --\n")
-  cat(" Records analysed:", x$n_records, "\n")
-  cat(" Risk categories: ", x$n_categories, "\n\n")
-  cat(" WRDI (global):", x$WRDI_global, "\n")
-  df <- x$indicators[order(-x$indicators$n_records), ]
-  print(df[, c("label", "n_records", "pct_records", "WRDI", "RCS")],
-        row.names = FALSE)
-  if (!is.null(x$MGP)) {
-    cat("\n MGP - Material-Gap Profile (top 5):\n")
-    print(utils::head(x$MGP, 5), row.names = FALSE)
-  }
-  cat("\nRun orm_report() to generate full reports.\n")
-  invisible(x)
-}
+#' @keywords internal
+NULL
