@@ -72,5 +72,4 @@
 #' @docType package
 #' @name orisma-package
 #' @aliases orisma
-#' @keywords internal
-NULL
+"_PACKAGE"
