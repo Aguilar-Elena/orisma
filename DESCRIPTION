@@ -21,8 +21,13 @@ Description: A complete pipeline for systematic bibliometric mapping of
     occupational health and safety (OHS) evidence. Starting from reference
     files exported from major bibliographic databases such as Web of Science,
     Scopus, PubMed, Dimensions, EBSCO, and others, 'orisma' automates
-    ingestion, deduplication, risk category extraction, bibliometric
-    analysis, relevance filtering, and report generation.
+    ingestion, deduplication, relevance filtering, occupational risk category
+    extraction, bibliometric analysis, and report generation. The package is
+    related to bibliometric science mapping and evidence synthesis workflows
+    described by Aria and Cuccurullo (2017) <doi:10.1016/j.joi.2017.08.007>,
+    Westgate (2019) <doi:10.1002/jrsm.1374>, and Lajeunesse (2016)
+    <doi:10.1111/2041-210X.12472>, but adds a domain-specific occupational
+    safety and health layer.
     The package implements three original bibliometric indicators:
     (1) the Worker-Risk Disconnection Index (WRDI), measuring the
     proportion of studies that characterise an occupational risk without
@@ -46,10 +51,6 @@ Description: A complete pipeline for systematic bibliometric mapping of
     Outputs include bilingual HTML reports, occupational risk sheets,
     priority reading rankings, guided extraction matrices for systematic
     review, and reproducibility certificates with MD5 hashes.
-    The package is domain-agnostic and can be applied to occupational
-    health topics including emerging technologies, chemical hazards,
-    ergonomic risks, psychosocial risks, biological agents, or any
-    combination thereof.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-GB

@@ -11,6 +11,9 @@
 
 \item{...}{Further arguments passed to or from other methods.}
 }
+\value{
+Invisibly returns the input \code{orisma_matrix} object. Called primarily for its console-printing side effect.
+}
 \description{
 Print method for orisma_matrix
 }

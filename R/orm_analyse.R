@@ -222,6 +222,7 @@ orm_analyse <- function(mx,
 #' @param x An object to print.
 #' @param ... Further arguments passed to or from other methods.
 #' @export
+#' @return Invisibly returns the input `orisma_result` object. Called primarily for its console-printing side effect.
 print.orisma_result <- function(x, ...) {
   cat("\n-- ORISMA Analysis Result --------------------------------\n")
   cat(" Records analysed:", x$n_records, "\n")

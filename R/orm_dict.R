@@ -1292,6 +1292,8 @@ NULL
 
 #' List available built-in dictionaries
 #' @export
+#' @details This function takes no arguments.
+#' @value A character vector with the names of the built-in dictionaries available in ORISMA.
 orm_dict_list <- function() {
   cat("Available built-in dictionaries:\n")
   cat("  'iso45001_insst' - Full 56-category dictionary (default)\n")
@@ -1327,6 +1329,7 @@ orm_dict <- function(name = "iso45001_insst") {
 #' @param dict An `orisma_dict` object.
 #' @param lang Character. `"en"` or `"es"`.
 #' @export
+#' @value A data frame containing the available risk categories, including category keys, labels, blocks and dictionary metadata.
 orm_dict_categories <- function(dict,
                                 lang = getOption("orisma.lang", "en")) {
   cats <- lapply(names(dict), function(k) {

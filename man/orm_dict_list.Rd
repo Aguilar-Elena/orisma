@@ -9,3 +9,6 @@ orm_dict_list()
 \description{
 List available built-in dictionaries
 }
+\details{
+This function takes no arguments.
+}

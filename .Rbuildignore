@@ -11,3 +11,4 @@
 ^.*\.log$
 ^.*\.Rcheck$
 ^.*\.tar\.gz$
+^CRAN-SUBMISSION$

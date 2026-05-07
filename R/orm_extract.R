@@ -176,6 +176,7 @@ orm_extract <- function(refs,
 #' @param x An object to print.
 #' @param ... Further arguments passed to or from other methods.
 #' @export
+#' @return Invisibly returns the input `orisma_matrix` object. Called primarily for its console-printing side effect.
 print.orisma_matrix <- function(x, ...) {
   cat("\n-- ORISMA extraction matrix ------------------------------\n")
   cat(" Records:    ", x$n_records, "\n")
