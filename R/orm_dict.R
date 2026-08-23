@@ -1,9 +1,3 @@
-# orm_dict.R
-# ORISMA - Superdiccionario completo de riesgos laborales
-# 56 categorias - INSST / ISO 45001 / NIOSH / EU-OSHA
-# Autor: Dr. Raul Aguilar-Elena - GPRL - VIU
-# Todos los terminos en ingles para maxima cobertura bibliografica internacional
-
 #' Built-in risk dictionaries for ORISMA
 #'
 #' @description
@@ -19,6 +13,20 @@
 #' A) Safety at work (18), B) Industrial hygiene (8), C) Ergonomics (8),
 #' D) Psychosociology (11), E) Biological hazards (5),
 #' F) Emerging technologies (8).
+#'
+#' Category assignment is multi-label: a record may be assigned to more than one
+#' category, so category frequencies do not sum to the number of records.
+#'
+#' @section Citing the taxonomy:
+#' The dictionary is also published as an autonomous, citable resource under a
+#' CC BY 4.0 licence, in CSV, JSON and SKOS/Turtle, so that it can be applied or
+#' extended independently of this package:
+#'
+#' Aguilar-Elena, R., & Delgado-Garcia, A. (2026). *ORISMA Occupational Risk
+#' Category Taxonomy* (Version 1.0.0) \[Data set\]. Zenodo.
+#' \doi{10.5281/zenodo.22066582}
+#'
+#' If you use the dictionary, please cite it in addition to the package.
 #'
 #' @examples
 #' # View available dictionaries
@@ -341,7 +349,7 @@ NULL
 
 
 # =============================================================================
-# BLOQUE B - HIGIENE INDUSTRIAL (7 categorias - INSST)
+# BLOQUE B - HIGIENE INDUSTRIAL (8 categorias - INSST)
 # =============================================================================
 
 .dict_b <- list(
@@ -1293,13 +1301,14 @@ NULL
 #' List available built-in dictionaries
 #' @export
 #' @details This function takes no arguments.
-#' @value A character vector with the names of the built-in dictionaries available in ORISMA.
+#' @return A character vector with the names of the built-in dictionaries available in ORISMA.
 orm_dict_list <- function() {
   cat("Available built-in dictionaries:\n")
-  cat("  'iso45001_insst' - Full 56-category dictionary (default)\n")
-  cat("    Blocks: A) Safety (18) | B) Hygiene (7) | C) Ergonomics (8)\n")
+  cat("  'iso45001_insst' - Full 58-category dictionary (default)\n")
+  cat("    Blocks: A) Safety (18) | B) Hygiene (8) | C) Ergonomics (8)\n")
   cat("            D) Psychosociology (11) | E) Biological (5) | F) Emerging (8)\n")
   cat("    Anchored in: INSST + ISO 45001 + NIOSH + EU-OSHA\n")
+  cat("    Taxonomy DOI: 10.5281/zenodo.22066582 (CC BY 4.0)\n")
   invisible(c("iso45001_insst"))
 }
 
@@ -1329,7 +1338,7 @@ orm_dict <- function(name = "iso45001_insst") {
 #' @param dict An `orisma_dict` object.
 #' @param lang Character. `"en"` or `"es"`.
 #' @export
-#' @value A data frame containing the available risk categories, including category keys, labels, blocks and dictionary metadata.
+#' @return A data frame containing the available risk categories, including category keys, labels, blocks and dictionary metadata.
 orm_dict_categories <- function(dict,
                                 lang = getOption("orisma.lang", "en")) {
   cats <- lapply(names(dict), function(k) {

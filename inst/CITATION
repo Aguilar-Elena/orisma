@@ -1,0 +1,32 @@
+citHeader(
+  "To cite 'orisma' in publications, cite the software. If you use the risk category taxonomy - directly, or through orm_dict() and any function that depends on it - please cite the taxonomy as well, as required by its CC BY 4.0 licence."
+)
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "orisma: Occupational Risk Integrated Systematic Mapping and Analysis",
+  author   = c(
+    person("Raul", "Aguilar-Elena", comment = c(ORCID = "0000-0001-8656-8155")),
+    person("Ana", "Delgado-Garcia", comment = c(ORCID = "0009-0003-7079-5507"))
+  ),
+  year     = "2026",
+  note     = "R package version 0.1.0",
+  doi      = "10.32614/CRAN.package.orisma",
+  url      = "https://CRAN.R-project.org/package=orisma",
+  header   = "Software:"
+)
+
+bibentry(
+  bibtype   = "Misc",
+  title     = "ORISMA Occupational Risk Category Taxonomy: a bilingual controlled vocabulary of 58 occupational risk categories for bibliometric mapping of occupational safety and health literature",
+  author    = c(
+    person("Raul", "Aguilar-Elena", comment = c(ORCID = "0000-0001-8656-8155")),
+    person("Ana", "Delgado-Garcia", comment = c(ORCID = "0009-0003-7079-5507"))
+  ),
+  year      = "2026",
+  publisher = "Zenodo",
+  doi       = "10.5281/zenodo.22066582",
+  url       = "https://doi.org/10.5281/zenodo.22066582",
+  note      = "Version 1.0.0 [Data set]",
+  header    = "Risk category taxonomy:"
+)

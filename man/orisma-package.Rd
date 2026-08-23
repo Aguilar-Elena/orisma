@@ -85,6 +85,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Raúl Aguilar Elena \email{raguilar@universidadviu.com} (\href{https://orcid.org/0000-0001-8656-8155}{ORCID})
   \item Ana Delgado-Garcia \email{a.delgado@usal.es}
 }
 

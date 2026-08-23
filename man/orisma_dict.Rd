@@ -17,7 +17,23 @@ The dictionary covers 58 risk categories organised in 6 blocks:
 A) Safety at work (18), B) Industrial hygiene (8), C) Ergonomics (8),
 D) Psychosociology (11), E) Biological hazards (5),
 F) Emerging technologies (8).
+
+Category assignment is multi-label: a record may be assigned to more than one
+category, so category frequencies do not sum to the number of records.
 }
+\section{Citing the taxonomy}{
+
+The dictionary is also published as an autonomous, citable resource under a
+CC BY 4.0 licence, in CSV, JSON and SKOS/Turtle, so that it can be applied or
+extended independently of this package:
+
+Aguilar-Elena, R., & Delgado-Garcia, A. (2026). \emph{ORISMA Occupational Risk
+Category Taxonomy} (Version 1.0.0) [Data set]. Zenodo.
+\doi{10.5281/zenodo.22066582}
+
+If you use the dictionary, please cite it in addition to the package.
+}
+
 \examples{
 # View available dictionaries
 orm_dict_list()

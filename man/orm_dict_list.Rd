@@ -6,6 +6,9 @@
 \usage{
 orm_dict_list()
 }
+\value{
+A character vector with the names of the built-in dictionaries available in ORISMA.
+}
 \description{
 List available built-in dictionaries
 }

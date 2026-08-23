@@ -11,6 +11,9 @@ orm_dict_categories(dict, lang = getOption("orisma.lang", "en"))
 
 \item{lang}{Character. \code{"en"} or \code{"es"}.}
 }
+\value{
+A data frame containing the available risk categories, including category keys, labels, blocks and dictionary metadata.
+}
 \description{
 List risk categories in a dictionary
 }
