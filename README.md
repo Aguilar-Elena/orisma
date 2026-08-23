@@ -129,26 +129,12 @@ The ASS is not a measure of study quality. It is a measure of how informative th
 
 <hr>
 
-## Bridge articles
 
-A **bridge article** connects technical science with applied occupational prevention.
-
-It usually combines:
-
-1. A technology, process or work task.
-2. A hazardous agent or risk factor.
-3. A real worker population or workplace setting.
-4. Exposure measurement or workplace assessment.
-5. Preventive recommendations or control measures.
-
-Bridge articles are useful because they help practitioners move from general scientific evidence to concrete preventive action.
-
-<hr>
 
 ## Installation
 
 ```r
-# From CRAN (once published)
+# From CRAN
 install.packages("orisma")
 
 # Development version from GitHub
@@ -259,6 +245,16 @@ dict <- orm_dict_add_category(dict,
 )
 ```
 
+### The taxonomy as a standalone resource
+
+The 58-category taxonomy is also published as an autonomous, citable resource under a
+CC BY 4.0 licence, in CSV, JSON and SKOS/Turtle formats, so that it can be applied,
+audited or extended independently of this package and outside R.
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22066582.svg)](https://doi.org/10.5281/zenodo.22066582)
+
+If you use the taxonomy — directly, or through any `orisma` function that depends on
+`orm_dict()` — please cite it in addition to the package.
 <hr>
 
 ## Supported databases
@@ -280,20 +276,6 @@ Export all databases in **RIS format**, place files in a folder, and run `orm_lo
 
 <hr>
 
-## Abstract Sufficiency Score (ASS)
-
-The ASS is a cumulative 0-5 index measuring how much preventively useful information an abstract contains:
-
-| Score | Meaning |
-|---|---|
-| 0 | Non-informative for OHS purposes |
-| 1 | Mentions a hazard but no occupational context |
-| 2 | Mentions occupational/workplace context |
-| 3 | Mentions exposure measurement or quantification |
-| 4 | Mentions exposure in workers with a result |
-| 5 | Complete: exposure + worker population + method + prevention |
-
-<hr>
 
 ## Bridge articles
 
@@ -334,15 +316,26 @@ Country-specific legal requirements, occupational exposure limits and regulatory
 
 ## Citation
 
-If you use `orisma` in your research, please cite:
+If you use `orisma` in your research, please cite the software:
 
 ```
-Aguilar-Elena, R. & Delgado-Garcia, A. (2025). orisma: Occupational Risk
+Aguilar-Elena, R., & Delgado-García, A. (2026). orisma: Occupational Risk
 Integrated Systematic Mapping and Analysis. R package version 0.1.0.
-Universidad Internacional de Valencia (VIU) & Universidad de Salamanca (USAL).
-https://github.com/Aguilar-Elena/orisma
+https://doi.org/10.32614/CRAN.package.orisma
 ```
 
+If you use the risk category taxonomy, please also cite it:
+
+```
+Aguilar-Elena, R., & Delgado-García, A. (2026). ORISMA Occupational Risk Category
+Taxonomy: a bilingual controlled vocabulary of 58 occupational risk categories for
+bibliometric mapping of occupational safety and health literature (Version 1.0.0)
+[Data set]. Zenodo. https://doi.org/10.5281/zenodo.22066582
+```
+
+In R, `citation("orisma")` returns both entries.
+
+<hr>
 <hr>
 
 ## Authors
